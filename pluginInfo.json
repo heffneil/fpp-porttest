@@ -1,0 +1,29 @@
+{
+	"repoName": "fpp-porttest",
+	"name": "Port Test",
+	"author": "heffneil",
+	"description": "Tick the pixel-string ports of a controller and light only those, using FPP's own channel test, so you can see which props are on which port. Handy when ports are not yet assigned in xLights. The test stays lit until you turn it off.",
+	"homeURL": "https://github.com/heffneil/fpp-porttest",
+	"srcURL": "https://github.com/heffneil/fpp-porttest.git",
+	"bugURL": "https://github.com/heffneil/fpp-porttest/issues",
+	"allowUpdates": 1,
+	"releaseNotesStyle": "gitHistory",
+	"privacy": {
+		"summary": "Lights chosen pixel ports using FPP's own channel test on this device. Nothing is sent anywhere or stored.",
+		"sends": [],
+		"collects": [],
+		"sensors": [],
+		"remoteAccess": "none",
+		"systemChanges": [],
+		"closedCode": false,
+		"other": "Starts and stops FPP's own channel test through its local API. Uninstalling stops any test this plugin left running."
+	},
+	"versions": [
+		{
+			"minFPPVersion": "10.0",
+			"maxFPPVersion": "0",
+			"branch": "main",
+			"sha": ""
+		}
+	]
+}
