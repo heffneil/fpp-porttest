@@ -122,7 +122,115 @@
     return formatChannelSet(mergeRanges(ranges));
   }
 
+  var PATTERNS = { solid: 'RGB Single Color', chase: 'RGB Chase', cycle: 'RGB Cycle' };
+  var CHASE_TYPES = [
+    'R-G-B', 'R-G-B-All', 'R-G-B-None', 'R-G-B-All-None',
+    'R-G-B-W', 'R-G-B-W-All', 'R-G-B-W-None', 'R-G-B-W-All-None'
+  ];
+  var DEFAULT_COLOR = '#404040';
+  var DEFAULT_INTERVAL_MS = 1000;
+
+  // The Test Start command body for POST /api/command. Only the channel-based
+  // effects are ever built: Output Specific cannot be limited to ports.
+  function buildTestStart(opts) {
+    var ms = Math.floor(Number(opts.intervalMs));
+    if (!(ms >= 0)) ms = DEFAULT_INTERVAL_MS;
+    ms = Math.min(10000, Math.max(100, ms));
+    return {
+      command: 'Test Start',
+      multisyncCommand: false,
+      multisyncHosts: '',
+      args: [String(ms), PATTERNS[opts.pattern], String(opts.channelSet), String(opts.value)]
+    };
+  }
+
+  function buildTestStop() {
+    return { command: 'Test Stop', multisyncCommand: false, multisyncHosts: '', args: [] };
+  }
+
+  // Parse FPP channel-set text ("1-3;7;9-10"; commas accepted too) into ranges.
+  // Empty or malformed tokens are ignored.
+  function parseChannelSet(str) {
+    var out = [];
+    String(str === undefined || str === null ? '' : str).split(/[;,]/).forEach(function (tok) {
+      var m = /^\s*(\d+)\s*(?:-\s*(\d+)\s*)?$/.exec(tok);
+      if (!m) return;
+      var a = parseInt(m[1], 10);
+      var b = m[2] === undefined ? a : parseInt(m[2], 10);
+      if (b >= a) out.push([a, b]);
+    });
+    return out;
+  }
+
+  // 'RGBChase-RGBWAN' -> 'R-G-B-W-All-None'. Unknown input gives 'R-G-B'.
+  var SUFFIX_TO_TYPE = {
+    RGB: 'R-G-B', RGBA: 'R-G-B-All', RGBN: 'R-G-B-None', RGBAN: 'R-G-B-All-None',
+    RGBW: 'R-G-B-W', RGBWA: 'R-G-B-W-All', RGBWN: 'R-G-B-W-None', RGBWAN: 'R-G-B-W-All-None'
+  };
+  function chaseTypeFromSubMode(subMode) {
+    var suffix = String(subMode === undefined || subMode === null ? '' : subMode).split('-').pop();
+    return Object.prototype.hasOwnProperty.call(SUFFIX_TO_TYPE, suffix) ? SUFFIX_TO_TYPE[suffix] : 'R-G-B';
+  }
+
+  function covers(testRanges, r) {
+    for (var i = 0; i < testRanges.length; i++) {
+      if (testRanges[i][0] <= r[0] && r[1] <= testRanges[i][1]) return true;
+    }
+    return false;
+  }
+
+  function hex2(n) {
+    n = Math.max(0, Math.min(255, Math.floor(Number(n)) || 0));
+    return (n < 16 ? '0' : '') + n.toString(16);
+  }
+
+  // Decide whether the running test (the whole GET /api/fppd/testing body) is
+  // one this page could have started over some of these ports.
+  function recognise(summaries, testingBody) {
+    var cfg = testingBody && typeof testingBody === 'object' ? testingBody.config : null;
+    if (!cfg || typeof cfg !== 'object') return { kind: 'other', reason: 'No test status was returned.' };
+    if (!cfg.enabled) return { kind: 'none' };
+
+    var pattern = cfg.mode === 'RGBFill' ? 'solid' : cfg.mode === 'RGBChase' ? 'chase'
+      : cfg.mode === 'RGBCycle' ? 'cycle' : null;
+    if (!pattern) return { kind: 'other', reason: 'A different kind of test is running (' + String(cfg.mode) + ').' };
+    if (typeof cfg.channelSet !== 'string' || cfg.channelSet === '') {
+      return { kind: 'other', reason: 'A test is running that is not limited to a channel range.' };
+    }
+
+    var testRanges = mergeRanges(parseChannelSet(cfg.channelSet));
+    if (!testRanges.length) return { kind: 'other', reason: 'The running test has no readable channel range.' };
+
+    var ports = [];
+    var union = [];
+    summaries.forEach(function (sum) {
+      if (!sum.hasPixels) return;
+      if (sum.ranges.every(function (r) { return covers(testRanges, r); })) {
+        ports.push(sum.portNumber);
+        union = union.concat(sum.ranges);
+      }
+    });
+    if (!ports.length) return { kind: 'other', reason: 'The running test does not cover any whole port.' };
+    if (formatChannelSet(mergeRanges(union)) !== formatChannelSet(testRanges)) {
+      return { kind: 'other', reason: 'The running test covers channels that are not whole ports.' };
+    }
+
+    var value = pattern === 'solid'
+      ? '#' + hex2(cfg.color1) + hex2(cfg.color2) + hex2(cfg.color3)
+      : chaseTypeFromSubMode(cfg.subMode);
+    return { kind: 'ours', ports: ports, pattern: pattern, value: value };
+  }
+
   return {
+    PATTERNS: PATTERNS,
+    CHASE_TYPES: CHASE_TYPES,
+    DEFAULT_COLOR: DEFAULT_COLOR,
+    DEFAULT_INTERVAL_MS: DEFAULT_INTERVAL_MS,
+    buildTestStart: buildTestStart,
+    buildTestStop: buildTestStop,
+    parseChannelSet: parseChannelSet,
+    chaseTypeFromSubMode: chaseTypeFromSubMode,
+    recognise: recognise,
     stringRange: stringRange,
     mergeRanges: mergeRanges,
     portRanges: portRanges,
