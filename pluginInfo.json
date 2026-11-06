@@ -6,6 +6,7 @@
 	"homeURL": "https://github.com/heffneil/fpp-porttest",
 	"srcURL": "https://github.com/heffneil/fpp-porttest.git",
 	"bugURL": "https://github.com/heffneil/fpp-porttest/issues",
+	"iconURL": "https://raw.githubusercontent.com/heffneil/fpp-porttest/main/icon.png",
 	"allowUpdates": 1,
 	"releaseNotesStyle": "gitHistory",
 	"privacy": {
