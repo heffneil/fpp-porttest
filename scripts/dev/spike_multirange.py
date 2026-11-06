@@ -20,8 +20,10 @@ DIM_WHITE = "#404040"
 
 def http(method, url, body=None):
     data = None if body is None else json.dumps(body).encode()
-    req = urllib.request.Request(url, data=data, method=method,
-                                 headers={"Content-Type": "application/json"})
+    # FPP's API answers a GET that carries a Content-Type header with a 404
+    # (seen on a 10.3 board), so only requests with a body get one.
+    headers = {} if data is None else {"Content-Type": "application/json"}
+    req = urllib.request.Request(url, data=data, method=method, headers=headers)
     with urllib.request.urlopen(req, timeout=20) as resp:
         return resp.read().decode()
 
