@@ -39,7 +39,7 @@
         rootEl.appendChild(alertBox('info', 'No pixel string output is configured on this board.'));
         return { getSelection: function () { return []; } };
       }
-      return build(rootEl, output.ports, opts.api);
+      return build(rootEl, output.ports, opts.api, output.subType);
     }, function (err) {
       rootEl.textContent = '';
       rootEl.appendChild(alertBox('danger', 'Could not load the pixel string outputs: ' + messageOf(err)));
@@ -47,7 +47,7 @@
     });
   }
 
-  function build(rootEl, ports, api) {
+  function build(rootEl, ports, api, subType) {
     var core = root.PortTestCore;
     var summaries = ports.map(core.summarizePort)
       .sort(function (a, b) { return a.portNumber - b.portNumber; });
@@ -88,6 +88,22 @@
     controls.appendChild(color);
     controls.appendChild(chaseType);
     controls.appendChild(status);
+
+    var limitLabel = el('label', 'ms-auto text-body-secondary', 'Ports shown:');
+    limitLabel.htmlFor = 'ptLimit';
+    var limit = el('input', 'form-control form-control-sm');
+    limit.id = 'ptLimit';
+    limit.type = 'number';
+    limit.min = '1';
+    limit.max = String(summaries.length);
+    limit.style.width = '5rem';
+    limit.title = 'Show ports 1 to this number. Some capes have fewer ports than the driver lists.';
+    var limitDefault = core.defaultPortLimit(subType, summaries.length);
+    var saved = null;
+    try { saved = parseInt(localStorage.getItem('porttest.limit'), 10); } catch (e) { saved = null; }
+    limit.value = String(saved >= 1 && saved <= summaries.length ? saved : limitDefault);
+    controls.appendChild(limitLabel);
+    controls.appendChild(limit);
 
     var hint = el('div', 'text-body-secondary mb-2');
     hint.id = 'ptHint';
@@ -170,10 +186,15 @@
     rootEl.appendChild(wrap);
 
     // ---- helpers ----------------------------------------------------------
-    function enabledRows() { return rows.filter(function (r) { return !r.box.disabled; }); }
+    function limitValue() {
+      var n = parseInt(limit.value, 10);
+      return n >= 1 ? Math.min(n, summaries.length) : summaries.length;
+    }
+    function isShown(r) { return r.summary.portNumber < limitValue(); }
+    function enabledRows() { return rows.filter(function (r) { return isShown(r) && !r.box.disabled; }); }
 
     function getSelection() {
-      return rows.filter(function (r) { return r.box.checked; })
+      return rows.filter(function (r) { return isShown(r) && r.box.checked; })
         .map(function (r) { return r.summary.portNumber; });
     }
 
@@ -189,6 +210,12 @@
     // Everything on screen that depends on the boxes, the pattern or the
     // board's state. Never sends anything.
     function render() {
+      rows.forEach(function (r) {
+        var shown = isShown(r);
+        r.tr.hidden = !shown;
+        r.tr.classList.toggle('d-none', !shown);
+        if (!shown) r.box.checked = false;
+      });
       var enabled = enabledRows();
       var ticked = enabled.filter(function (r) { return r.box.checked; }).length;
       all.checked = enabled.length > 0 && ticked === enabled.length;
@@ -201,7 +228,7 @@
       });
 
       status.textContent = testingPorts
-        ? 'Testing ' + testingPorts.length + ' of ' + summaries.length + ' ports'
+        ? 'Testing ' + testingPorts.length + ' of ' + limitValue() + ' ports'
         : '';
 
       show(color, pattern.value === 'solid' || pattern.value === 'portnumber');
@@ -268,7 +295,15 @@
       enabledRows().forEach(function (r) { r.box.checked = on; });
       userChanged();
     });
-    pattern.addEventListener('change', userChanged);
+    limit.addEventListener('change', function () {
+      try { localStorage.setItem('porttest.limit', String(limitValue())); } catch (e) { /* not saved */ }
+      userChanged();
+    });
+    pattern.addEventListener('change', function () {
+      // The default dim grey is hard to see on a few pixels; Port number starts white.
+      if (pattern.value === 'portnumber' && color.value === core.DEFAULT_COLOR) color.value = '#ffffff';
+      userChanged();
+    });
     color.addEventListener('input', userChanged);
     chaseType.addEventListener('change', userChanged);
 

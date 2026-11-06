@@ -79,3 +79,11 @@ test('selectionChannelSet: a selected port with no pixels contributes nothing', 
   const s = [summarizePort(port(0, [vs(1, 800)])), summarizePort(port(1, []))];
   assert.equal(selectionChannelSet(s, [0, 1]), '1-2400');
 });
+
+test('defaultPortLimit: K32A-B has 32 direct ports; anything else shows them all', () => {
+  const { defaultPortLimit } = require('../assets/porttest-core.js');
+  assert.equal(defaultPortLimit('K32A-B', 48), 32);
+  assert.equal(defaultPortLimit('K32A-B', 20), 20);
+  assert.equal(defaultPortLimit('SomethingElse', 48), 48);
+  assert.equal(defaultPortLimit(undefined, 16), 16);
+});

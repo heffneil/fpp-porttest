@@ -132,11 +132,12 @@
     return formatChannelSet(mergeRanges(ranges));
   }
 
-  // Port N lights its first N pixels (capped at its first string), so counting
-  // the lit pixels at the start of a port tells you its number.
+  // Port N lights its first 10 x N pixels (capped at its first string), so the
+  // lit stretch grows in clear steps from port to port, easy to see on a camera.
+  var PORT_NUMBER_STEP_PIXELS = 10;
   function portNumberRanges(sum) {
     if (!sum.hasPixels) return [];
-    var end = Math.min(sum.firstStart + (sum.portNumber + 1) * sum.channelsPerNode - 1, sum.firstEnd);
+    var end = Math.min(sum.firstStart + (sum.portNumber + 1) * PORT_NUMBER_STEP_PIXELS * sum.channelsPerNode - 1, sum.firstEnd);
     return [[sum.firstStart, end]];
   }
 
@@ -148,6 +149,14 @@
       if (chosen[sum.portNumber]) ranges = ranges.concat(portNumberRanges(sum));
     });
     return formatChannelSet(mergeRanges(ranges));
+  }
+
+  // FPP lists every output the driver supports, but a cape may have fewer
+  // physical ports. K32A-B: 32 direct ports (33-48 are its differential outputs).
+  var DIRECT_PORTS = { 'K32A-B': 32 };
+  function defaultPortLimit(subType, total) {
+    var known = Object.prototype.hasOwnProperty.call(DIRECT_PORTS, subType) ? DIRECT_PORTS[subType] : total;
+    return Math.max(1, Math.min(total, known));
   }
 
   var PATTERNS = { solid: 'RGB Single Color', portnumber: 'RGB Single Color', chase: 'RGB Chase', cycle: 'RGB Cycle' };
@@ -261,6 +270,7 @@
   }
 
   return {
+    defaultPortLimit: defaultPortLimit,
     PATTERNS: PATTERNS,
     CHASE_TYPES: CHASE_TYPES,
     DEFAULT_COLOR: DEFAULT_COLOR,

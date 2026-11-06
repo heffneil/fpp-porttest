@@ -30,7 +30,7 @@
         for (var i = 0; i < outputs.length; i++) {
           var o = outputs[i];
           if (o && typeof o === 'object' && o.enabled) {
-            return { ports: Array.isArray(o.outputs) ? o.outputs : [] };
+            return { ports: Array.isArray(o.outputs) ? o.outputs : [], subType: typeof o.subType === 'string' ? o.subType : '' };
           }
         }
         return null;

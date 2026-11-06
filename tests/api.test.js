@@ -17,9 +17,9 @@ const rig = (response) => {
 };
 
 test('getOutput returns the first enabled output as {ports}', async () => {
-  const cfg = { channelOutputs: [{ enabled: 0, outputs: [{ portNumber: 9 }] }, { enabled: 1, outputs: [{ portNumber: 0 }] }] };
+  const cfg = { channelOutputs: [{ enabled: 0, outputs: [{ portNumber: 9 }] }, { enabled: 1, subType: 'K32A-B', outputs: [{ portNumber: 0 }] }] };
   const { api, calls } = rig(reply(200, JSON.stringify(cfg), 'application/json'));
-  assert.deepEqual(await api.getOutput('co-bbbStrings'), { ports: [{ portNumber: 0 }] });
+  assert.deepEqual(await api.getOutput('co-bbbStrings'), { ports: [{ portNumber: 0 }], subType: 'K32A-B' });
   assert.equal(calls[0].url, '/api/channel/output/co-bbbStrings');
 });
 
