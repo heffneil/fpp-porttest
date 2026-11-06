@@ -37,7 +37,34 @@
       });
     }
 
-    return { getOutput: getOutput };
+    // The whole GET /api/fppd/testing body: {Status, config}.
+    function getTesting() {
+      return getJson('/api/fppd/testing');
+    }
+
+    // POST /api/command. FPP answers with text/plain (HTTP 200 on success, 500
+    // with the message on error), so any 2xx is success; a JSON body that says
+    // Status: Error is treated as a failure too.
+    function command(body) {
+      return doFetch('/api/command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      }).then(function (resp) {
+        return resp.text().then(function (text) {
+          if (!resp.ok) {
+            throw new Error(text ? text : 'FPP answered ' + resp.status);
+          }
+          var parsed = null;
+          try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
+          if (parsed && typeof parsed === 'object' && String(parsed.Status).toLowerCase() === 'error') {
+            throw new Error(parsed.Message ? String(parsed.Message) : 'FPP reported an error');
+          }
+        });
+      });
+    }
+
+    return { getOutput: getOutput, getTesting: getTesting, command: command };
   }
 
   return { createApi: createApi };

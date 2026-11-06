@@ -9,6 +9,8 @@
  *   php -S 127.0.0.1:8146 -t harness harness/preview.php
  *
  *   GET /harness/fixture?name=normal|edge|disabled   choose the board layout
+ *   GET /harness/seed?name=none|ports2and5|other    set what test is "running"
+ *   GET /harness/fail?on=1|0                         make POST /api/command answer 500
  *   GET /requests                                    every API request, newest last
  *   GET /reset                                       clear the log
  *
@@ -20,6 +22,8 @@ $WORK = $ROOT . '/harness/.preview-media';
 @mkdir($WORK, 0777, true);
 $LOG = $WORK . '/requests.log';
 $FIXTURE_FILE = $WORK . '/fixture';
+$TESTING_FILE = $WORK . '/testing.json';
+$FAIL_FILE = $WORK . '/fail';
 
 $FIXTURES = [
     'normal' => 'co-bbbStrings.json',
@@ -55,9 +59,114 @@ if ($uri === '/harness/fixture') {
     exit;
 }
 
+function testingConfig()
+{
+    global $TESTING_FILE;
+    $raw = is_readable($TESTING_FILE) ? file_get_contents($TESTING_FILE) : '';
+    $cfg = json_decode($raw, true);
+    return is_array($cfg) ? $cfg : ['enabled' => 0];
+}
+
+// Mirrors ChannelTester.cpp mapSubMode / mapPattern for RGB Chase and Cycle.
+function chaseSubMode($type)
+{
+    $map = ['R-G-B-All' => 'RGBA', 'R-G-B-None' => 'RGBN', 'R-G-B-All-None' => 'RGBAN',
+        'R-G-B-W' => 'RGBW', 'R-G-B-W-All' => 'RGBWA', 'R-G-B-W-None' => 'RGBWN', 'R-G-B-W-All-None' => 'RGBWAN'];
+    return $map[$type] ?? 'RGB';
+}
+function chasePattern($type)
+{
+    $map = [
+        'R-G-B-All' => 'FF000000FF000000FFFFFFFF',
+        'R-G-B-None' => 'FF000000FF000000FF000000',
+        'R-G-B-All-None' => 'FF000000FF000000FFFFFFFF000000',
+        'R-G-B-W' => 'FF00000000FF00000000FF00000000FF',
+        'R-G-B-W-All' => 'FF00000000FF00000000FF00000000FFFFFFFFFF',
+        'R-G-B-W-None' => 'FF00000000FF00000000FF00000000FF00000000',
+        'R-G-B-W-All-None' => 'FF00000000FF00000000FF00000000FFFFFFFFFF00000000',
+    ];
+    return $map[$type] ?? 'FF000000FF000000FF';
+}
+
+if ($uri === '/harness/seed') {
+    $name = $_GET['name'] ?? '';
+    header('Content-Type: text/plain');
+    $seeds = [
+        'none' => ['enabled' => 0],
+        // Ports labelled 2 and 5 on the normal fixture, in the shape of tests/fixtures/testing-running-fill.json.
+        'ports2and5' => ['channelSet' => '2401-4800;9601-12000', 'channelSetType' => 'channelRange',
+            'channelsPerNode' => 3, 'color1' => 64, 'color2' => 64, 'color3' => 64, 'colorPattern' => '',
+            'cycleMS' => 1000, 'enabled' => 1, 'mode' => 'RGBFill'],
+        'other' => ['enabled' => 1, 'mode' => 'Outputs', 'outputs' => 'BBB Pixel Strings', 'type' => 1],
+    ];
+    if (!isset($seeds[$name])) {
+        http_response_code(400);
+        echo "unknown seed; use none, ports2and5 or other\n";
+        exit;
+    }
+    file_put_contents($TESTING_FILE, json_encode($seeds[$name]));
+    echo "seed: $name\n";
+    exit;
+}
+
+if ($uri === '/harness/fail') {
+    file_put_contents($FAIL_FILE, ($_GET['on'] ?? '0') === '1' ? '1' : '0');
+    header('Content-Type: text/plain');
+    echo "fail: " . (($_GET['on'] ?? '0') === '1' ? 'on' : 'off') . "\n";
+    exit;
+}
+
 if (str_starts_with($uri, '/api/')) {
-    file_put_contents($LOG, $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . "\n", FILE_APPEND);
+    $raw = $_SERVER['REQUEST_METHOD'] === 'POST' ? file_get_contents('php://input') : '';
+    file_put_contents($LOG, $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ($raw !== '' ? ' ' . $raw : '') . "\n", FILE_APPEND);
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $uri === '/api/command') {
+        // FPP answers text/plain: 200 on success, 500 with the message on error.
+        header('Content-Type: text/plain');
+        if (is_readable($FAIL_FILE) && trim((string) file_get_contents($FAIL_FILE)) === '1') {
+            http_response_code(500);
+            echo "failed on purpose (harness)";
+            exit;
+        }
+        $cmd = json_decode($raw, true);
+        $args = is_array($cmd) ? ($cmd['args'] ?? []) : [];
+        if (($cmd['command'] ?? '') === 'Test Stop') {
+            file_put_contents($TESTING_FILE, json_encode(['enabled' => 0]));
+            echo 'Test Stopped';
+            exit;
+        }
+        if (($cmd['command'] ?? '') === 'Test Start') {
+            $cfg = ['enabled' => 1, 'cycleMS' => (int) ($args[0] ?? 1000), 'colorPattern' => '',
+                'channelSet' => (string) ($args[2] ?? ''), 'channelSetType' => 'channelRange'];
+            $effect = $args[1] ?? '';
+            if ($effect === 'RGB Single Color') {
+                $v = hexdec(ltrim((string) ($args[3] ?? '#000000'), '#'));
+                $cfg += ['mode' => 'RGBFill', 'channelsPerNode' => 3,
+                    'color1' => ($v >> 16) & 255, 'color2' => ($v >> 8) & 255, 'color3' => $v & 255];
+            } elseif ($effect === 'RGB Chase' || $effect === 'RGB Cycle') {
+                $mode = $effect === 'RGB Chase' ? 'RGBChase' : 'RGBCycle';
+                $type = (string) ($args[3] ?? 'R-G-B');
+                $cfg += ['mode' => $mode, 'subMode' => $mode . '-' . chaseSubMode($type),
+                    'channelsPerNode' => strpos($type, 'W') !== false ? 4 : 3];
+                $cfg['colorPattern'] = chasePattern($type);
+            } else {
+                http_response_code(500);
+                echo 'Unsupported test: ' . $effect;
+                exit;
+            }
+            file_put_contents($TESTING_FILE, json_encode($cfg));
+            echo 'Test Started';
+            exit;
+        }
+        echo 'OK';
+        exit;
+    }
+
     header('Content-Type: application/json');
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $uri === '/api/fppd/testing') {
+        echo json_encode(['Status' => 'OK', 'config' => testingConfig(), 'respCode' => 200]);
+        exit;
+    }
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && $uri === '/api/channel/output/co-bbbStrings') {
         readfile($ROOT . '/harness/fixtures/' . $FIXTURES[chosenFixture()]);
         exit;
