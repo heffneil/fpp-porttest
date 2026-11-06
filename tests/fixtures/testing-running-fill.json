@@ -1,0 +1,17 @@
+{
+  "Message": "",
+  "Status": "OK",
+  "config": {
+    "channelSet": "207209-209608;214409-216808",
+    "channelSetType": "channelRange",
+    "channelsPerNode": 3,
+    "color1": 64,
+    "color2": 64,
+    "color3": 64,
+    "colorPattern": "",
+    "cycleMS": 1000,
+    "enabled": 1,
+    "mode": "RGBFill"
+  },
+  "respCode": 200
+}

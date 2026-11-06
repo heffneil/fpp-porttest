@@ -1,0 +1,14 @@
+{
+  "Message": "",
+  "Status": "OK",
+  "config": {
+    "channelSetType": "channelRange",
+    "colorPattern": "",
+    "cycleMS": 2000,
+    "enabled": 1,
+    "mode": "Outputs",
+    "outputs": "BBB Pixel Strings",
+    "type": 1
+  },
+  "respCode": 200
+}
