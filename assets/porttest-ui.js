@@ -63,7 +63,7 @@
     patternLabel.htmlFor = 'ptPattern';
     var pattern = el('select', 'form-select w-auto');
     pattern.id = 'ptPattern';
-    [['off', 'Off'], ['solid', 'Solid color'], ['chase', 'RGB Chase'], ['cycle', 'RGB Cycle']].forEach(function (o) {
+    [['off', 'Off'], ['solid', 'Solid color'], ['portnumber', 'Port number'], ['chase', 'RGB Chase'], ['cycle', 'RGB Cycle']].forEach(function (o) {
       var opt = el('option', '', o[1]);
       opt.value = o[0];
       pattern.appendChild(opt);
@@ -109,15 +109,16 @@
     // ---- table ------------------------------------------------------------
     var table = el('table', 'table table-sm align-middle');
     var head = el('tr');
-    var allCell = el('th', 'py-2');
-    var all = el('input', 'form-check-input fs-4 m-0');
+    var allCell = el('th', 'py-1');
+    var all = el('input', 'form-check-input fs-5 m-0');
     all.type = 'checkbox';
     all.id = 'ptAll';
+    all.style.width = all.style.height = '1.25rem';
     all.setAttribute('aria-label', 'Select all ports');
     allCell.appendChild(all);
     head.appendChild(allCell);
     ['Port', 'Protocol', 'Description', 'Start channel', 'Pixels', 'End channel'].forEach(function (h) {
-      head.appendChild(el('th', 'py-2', h));
+      head.appendChild(el('th', 'py-1', h));
     });
     var thead = el('thead');
     thead.appendChild(head);
@@ -126,21 +127,21 @@
     var tbody = el('tbody');
     var rows = summaries.map(function (s) {
       var tr = el('tr', s.hasPixels ? '' : 'text-body-secondary');
-      tr.style.height = '2.75rem';
-      if (s.hasPixels) tr.style.cursor = 'pointer';
+            if (s.hasPixels) tr.style.cursor = 'pointer';
 
-      var boxCell = el('td', 'py-2');
-      var box = el('input', 'form-check-input fs-4 m-0');
+      var boxCell = el('td', 'py-1');
+      var box = el('input', 'form-check-input fs-5 m-0');
       box.type = 'checkbox';
+      box.style.width = box.style.height = '1.25rem';
       box.disabled = !s.hasPixels;
       box.setAttribute('aria-label', 'Port ' + s.label);
       boxCell.appendChild(box);
       tr.appendChild(boxCell);
 
-      tr.appendChild(el('td', 'py-2', s.label));
-      tr.appendChild(el('td', 'py-2', s.protocol));
+      tr.appendChild(el('td', 'py-1', s.label));
+      tr.appendChild(el('td', 'py-1', s.protocol));
 
-      var desc = el('td', 'py-2');
+      var desc = el('td', 'py-1');
       desc.appendChild(document.createTextNode(s.description));
       if (!s.hasPixels) {
         desc.appendChild(el('div', 'small', 'Set a pixel count on the Pixel Strings page'));
@@ -151,9 +152,9 @@
       });
       tr.appendChild(desc);
 
-      tr.appendChild(el('td', 'py-2', s.hasPixels ? String(s.startChannel) : '-'));
-      tr.appendChild(el('td', 'py-2', String(s.pixelCount)));
-      tr.appendChild(el('td', 'py-2', s.hasPixels ? String(s.endChannel) : '-'));
+      tr.appendChild(el('td', 'py-1', s.hasPixels ? String(s.startChannel) : '-'));
+      tr.appendChild(el('td', 'py-1', String(s.pixelCount)));
+      tr.appendChild(el('td', 'py-1', s.hasPixels ? String(s.endChannel) : '-'));
 
       tbody.appendChild(tr);
       return { summary: s, tr: tr, box: box };
@@ -177,7 +178,7 @@
     }
 
     function currentValue() {
-      return pattern.value === 'solid' ? color.value : chaseType.value;
+      return pattern.value === 'chase' || pattern.value === 'cycle' ? chaseType.value : color.value;
     }
 
     function showError(text) {
@@ -203,7 +204,7 @@
         ? 'Testing ' + testingPorts.length + ' of ' + summaries.length + ' ports'
         : '';
 
-      show(color, pattern.value === 'solid');
+      show(color, pattern.value === 'solid' || pattern.value === 'portnumber');
       show(chaseType, pattern.value === 'chase' || pattern.value === 'cycle');
 
       var needTick = pattern.value !== 'off' && ticked === 0;
@@ -228,7 +229,9 @@
       lit = true; // even a failed start may have left something running
       var body = core.buildTestStart({
         pattern: pattern.value,
-        channelSet: core.selectionChannelSet(summaries, selection),
+        channelSet: pattern.value === 'portnumber'
+          ? core.portNumberChannelSet(summaries, selection)
+          : core.selectionChannelSet(summaries, selection),
         value: currentValue()
       });
       return api.command(body).then(function () {
@@ -288,7 +291,7 @@
       if (found.kind === 'ours') {
         rows.forEach(function (r) { r.box.checked = found.ports.indexOf(r.summary.portNumber) !== -1; });
         pattern.value = found.pattern;
-        if (found.pattern === 'solid') color.value = found.value;
+        if (found.pattern === 'solid' || found.pattern === 'portnumber') color.value = found.value;
         else chaseType.value = found.value;
         testingPorts = found.ports;
         lit = true;

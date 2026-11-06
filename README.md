@@ -18,7 +18,7 @@ Port Test appears under **Status/Control**.
 
 1. Open **Status/Control → Port Test**. Every pixel-string port is listed with its channels and pixel count.
 2. Tick the ports you want. The checkbox in the header selects all of them. Tapping anywhere on a row ticks it.
-3. Pick a pattern next to **Testing:** (Solid color, RGB Chase or RGB Cycle). Ticked ports light and turn green in the list; the status reads "Testing N of M ports".
+3. Pick a pattern next to **Testing:** (Solid color, Port number, RGB Chase or RGB Cycle). *Port number* lights just the first N pixels of port N, so you can count them to read the port. Ticked ports light and turn green in the list; the status reads "Testing N of M ports".
 4. Tick or untick ports while it runs and the lit set follows. Choose **Off** to stop.
 
 A test stays lit until you turn it off. Reloading the page does not stop it, and the page picks it up again when it loads.

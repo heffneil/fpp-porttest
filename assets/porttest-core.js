@@ -72,7 +72,16 @@
       }
     });
     var number = Math.floor(Number(port && port.portNumber));
+    // The lowest-start string with pixels: where a port-number test lights up.
+    var first = null;
+    strings.forEach(function (vs) {
+      var r = stringRange(vs);
+      if (r && (!first || r[0] < first.range[0])) first = { range: r, cpn: channelsPerNode(vs.colorOrder) };
+    });
     return {
+      firstStart: first ? first.range[0] : null,
+      firstEnd: first ? first.range[1] : null,
+      channelsPerNode: first ? first.cpn : 3,
       portNumber: number,
       label: String(number + 1),
       protocol: (port && typeof port.protocol === 'string') ? port.protocol : '',
@@ -122,7 +131,25 @@
     return formatChannelSet(mergeRanges(ranges));
   }
 
-  var PATTERNS = { solid: 'RGB Single Color', chase: 'RGB Chase', cycle: 'RGB Cycle' };
+  // Port N lights its first N pixels (capped at its first string), so counting
+  // the lit pixels at the start of a port tells you its number.
+  function portNumberRanges(sum) {
+    if (!sum.hasPixels) return [];
+    var end = Math.min(sum.firstStart + (sum.portNumber + 1) * sum.channelsPerNode - 1, sum.firstEnd);
+    return [[sum.firstStart, end]];
+  }
+
+  function portNumberChannelSet(summaries, selected) {
+    var chosen = {};
+    selected.forEach(function (n) { chosen[n] = true; });
+    var ranges = [];
+    summaries.forEach(function (sum) {
+      if (chosen[sum.portNumber]) ranges = ranges.concat(portNumberRanges(sum));
+    });
+    return formatChannelSet(mergeRanges(ranges));
+  }
+
+  var PATTERNS = { solid: 'RGB Single Color', portnumber: 'RGB Single Color', chase: 'RGB Chase', cycle: 'RGB Cycle' };
   var CHASE_TYPES = [
     'R-G-B', 'R-G-B-All', 'R-G-B-None', 'R-G-B-All-None',
     'R-G-B-W', 'R-G-B-W-All', 'R-G-B-W-None', 'R-G-B-W-All-None'
@@ -201,21 +228,32 @@
     var testRanges = mergeRanges(parseChannelSet(cfg.channelSet));
     if (!testRanges.length) return { kind: 'other', reason: 'The running test has no readable channel range.' };
 
-    var ports = [];
-    var union = [];
-    summaries.forEach(function (sum) {
-      if (!sum.hasPixels) return;
-      if (sum.ranges.every(function (r) { return covers(testRanges, r); })) {
-        ports.push(sum.portNumber);
-        union = union.concat(sum.ranges);
-      }
-    });
-    if (!ports.length) return { kind: 'other', reason: 'The running test does not cover any whole port.' };
-    if (formatChannelSet(mergeRanges(union)) !== formatChannelSet(testRanges)) {
-      return { kind: 'other', reason: 'The running test covers channels that are not whole ports.' };
+    // Which ports does the test cover, taking each port's lit ranges from `rangesOf`?
+    function match(rangesOf) {
+      var ports = [];
+      var union = [];
+      summaries.forEach(function (sum) {
+        var rs = rangesOf(sum);
+        if (!rs.length) return;
+        if (rs.every(function (r) { return covers(testRanges, r); })) {
+          ports.push(sum.portNumber);
+          union = union.concat(rs);
+        }
+      });
+      if (ports.length && formatChannelSet(mergeRanges(union)) === formatChannelSet(testRanges)) return ports;
+      return null;
     }
 
-    var value = pattern === 'solid'
+    var ports = match(function (sum) { return sum.ranges; });
+    if (!ports && pattern === 'solid') {
+      ports = match(portNumberRanges);
+      if (ports) pattern = 'portnumber';
+    }
+    if (!ports) {
+      return { kind: 'other', reason: 'The running test does not match whole ports or port numbers.' };
+    }
+
+    var value = pattern !== 'chase' && pattern !== 'cycle'
       ? '#' + hex2(cfg.color1) + hex2(cfg.color2) + hex2(cfg.color3)
       : chaseTypeFromSubMode(cfg.subMode);
     return { kind: 'ours', ports: ports, pattern: pattern, value: value };
@@ -237,6 +275,7 @@
     formatChannelSet: formatChannelSet,
     summarizePort: summarizePort,
     findOverlaps: findOverlaps,
-    selectionChannelSet: selectionChannelSet
+    selectionChannelSet: selectionChannelSet,
+    portNumberChannelSet: portNumberChannelSet
   };
 });
