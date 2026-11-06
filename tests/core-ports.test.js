@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { summarizePort, findOverlaps, selectionChannelSet } = require('../assets/porttest-core.js');
 
 const vs = (startChannel, pixelCount, description) =>
-  ({ startChannel, pixelCount, groupCount: 0, colorOrder: 'RGB', description: description || '' });
+  ({ startChannel: startChannel - 1, pixelCount, groupCount: 0, colorOrder: 'RGB', description: description || '' });
 const port = (portNumber, strings, extra) =>
   Object.assign({ portNumber, protocol: 'ws281x', virtualStrings: strings }, extra);
 

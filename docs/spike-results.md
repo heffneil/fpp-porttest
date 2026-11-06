@@ -38,3 +38,7 @@ At Neil's request FPP's own Port Number test (`Test Start` with `["2000","Output
 
 - FPP's API returns HTTP 404 for a GET that carries a `Content-Type` header (no header: 200; `application/json`: 404).
 - `POST /api/command` accepts form-urlencoded, `text/plain` and `application/json` bodies (checked with a no-op `Test Stop`).
+
+## Correction (found on .56, after the plugin shipped)
+
+FPP stores each string's `startChannel` **0-based** in the saved config (`vs.startChannel = row value - 1` in `www/co-pixelStrings.php`, shown +1). The spike script and the first plugin build treated it as 1-based, so every channel set was one channel early. A dim solid colour hid this (the multi-range finding above still holds). It surfaced with the Port number pattern: on .56 port 1's start is stored as `0`, so it sent channel `0-2`, which does not exist. Fixed in `stringRange` (`channel = startChannel + 1`) with tests that feed 0-based config values.

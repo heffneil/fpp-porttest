@@ -10,7 +10,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 1,
+              "startChannel": 0,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -23,7 +23,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 2401,
+              "startChannel": 2400,
               "pixelCount": 0,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -36,7 +36,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 4801,
+              "startChannel": 4800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -49,7 +49,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 7201,
+              "startChannel": 7200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -62,7 +62,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 9000,
+              "startChannel": 8999,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -75,14 +75,14 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 12001,
+              "startChannel": 12000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
               "description": ""
             },
             {
-              "startChannel": 14401,
+              "startChannel": 14400,
               "pixelCount": 100,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -95,7 +95,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 14701,
+              "startChannel": 14700,
               "pixelCount": 100,
               "groupCount": 1,
               "colorOrder": "RGBW",
@@ -108,7 +108,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 16801,
+              "startChannel": 16800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -121,7 +121,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 19201,
+              "startChannel": 19200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -134,7 +134,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 21601,
+              "startChannel": 21600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -147,7 +147,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 24001,
+              "startChannel": 24000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -160,7 +160,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 26401,
+              "startChannel": 26400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -173,7 +173,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 28801,
+              "startChannel": 28800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -186,7 +186,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 31201,
+              "startChannel": 31200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -199,7 +199,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 33601,
+              "startChannel": 33600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -212,7 +212,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 36001,
+              "startChannel": 36000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -225,7 +225,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 38401,
+              "startChannel": 38400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -238,7 +238,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 40801,
+              "startChannel": 40800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -251,7 +251,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 43201,
+              "startChannel": 43200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -264,7 +264,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 45601,
+              "startChannel": 45600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -277,7 +277,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 48001,
+              "startChannel": 48000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -290,7 +290,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 50401,
+              "startChannel": 50400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -303,7 +303,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 52801,
+              "startChannel": 52800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -316,7 +316,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 55201,
+              "startChannel": 55200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -329,7 +329,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 57601,
+              "startChannel": 57600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -342,7 +342,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 60001,
+              "startChannel": 60000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -355,7 +355,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 62401,
+              "startChannel": 62400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -368,7 +368,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 64801,
+              "startChannel": 64800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -381,7 +381,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 67201,
+              "startChannel": 67200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -394,7 +394,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 69601,
+              "startChannel": 69600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -407,7 +407,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 72001,
+              "startChannel": 72000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -420,7 +420,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 74401,
+              "startChannel": 74400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -433,7 +433,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 76801,
+              "startChannel": 76800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -446,7 +446,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 79201,
+              "startChannel": 79200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -459,7 +459,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 81601,
+              "startChannel": 81600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -472,7 +472,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 84001,
+              "startChannel": 84000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -485,7 +485,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 86401,
+              "startChannel": 86400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -498,7 +498,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 88801,
+              "startChannel": 88800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -511,7 +511,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 91201,
+              "startChannel": 91200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -524,7 +524,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 93601,
+              "startChannel": 93600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -537,7 +537,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 96001,
+              "startChannel": 96000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -550,7 +550,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 98401,
+              "startChannel": 98400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -563,7 +563,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 100801,
+              "startChannel": 100800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -576,7 +576,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 103201,
+              "startChannel": 103200,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -589,7 +589,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 105601,
+              "startChannel": 105600,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -602,7 +602,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 108001,
+              "startChannel": 108000,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -615,7 +615,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 110401,
+              "startChannel": 110400,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",
@@ -628,7 +628,7 @@
           "protocol": "ws2811",
           "virtualStrings": [
             {
-              "startChannel": 112801,
+              "startChannel": 112800,
               "pixelCount": 800,
               "groupCount": 1,
               "colorOrder": "RGB",

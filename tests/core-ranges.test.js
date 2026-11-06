@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { stringRange, mergeRanges, portRanges, formatChannelSet } = require('../assets/porttest-core.js');
 
-const vs = (startChannel, pixelCount, extra) => Object.assign({ startChannel, pixelCount, groupCount: 0, colorOrder: 'RGB' }, extra);
+const vs = (startChannel, pixelCount, extra) => Object.assign({ startChannel: startChannel - 1, pixelCount, groupCount: 0, colorOrder: 'RGB' }, extra);
 
 test('800 RGB pixels at 204809', () => {
   assert.deepEqual(stringRange(vs(204809, 800)), [204809, 207208]);
@@ -27,7 +27,7 @@ test('RGBW uses four channels', () => {
 });
 
 test('missing colorOrder defaults to RGB', () => {
-  assert.deepEqual(stringRange({ startChannel: 1, pixelCount: 100 }), [1, 300]);
+  assert.deepEqual(stringRange({ startChannel: 0, pixelCount: 100 }), [1, 300]);
 });
 
 test('zero or negative pixelCount gives null', () => {
@@ -62,4 +62,9 @@ test('formatChannelSet joins with semicolons, never commas', () => {
   assert.equal(out, '4801-7200;9601-12000');
   assert.ok(!out.includes(','));
   assert.equal(formatChannelSet([]), '');
+});
+
+test('config startChannel is 0-based: 0 is channel 1, as FPP shows it (+1) on the Pixel Strings page', () => {
+  assert.deepEqual(stringRange({ startChannel: 0, pixelCount: 800, colorOrder: 'RGB' }), [1, 2400]);
+  assert.deepEqual(stringRange({ startChannel: 2427, pixelCount: 809, colorOrder: 'RGB' }), [2428, 4854]);
 });

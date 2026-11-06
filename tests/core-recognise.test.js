@@ -15,7 +15,7 @@ const board = (first) => {
     out.push(summarizePort({
       portNumber: n,
       protocol: 'ws281x',
-      virtualStrings: [{ startChannel: first + n * 2400, pixelCount: 800, groupCount: 0, colorOrder: 'RGB', description: '' }],
+      virtualStrings: [{ startChannel: first - 1 + n * 2400, pixelCount: 800, groupCount: 0, colorOrder: 'RGB', description: '' }],
     }));
   }
   return out;

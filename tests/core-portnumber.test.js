@@ -5,7 +5,7 @@ const core = require('../assets/porttest-core.js');
 const { summarizePort, portNumberChannelSet, buildTestStart, recognise } = core;
 
 const vs = (startChannel, pixelCount, extra) =>
-  Object.assign({ startChannel, pixelCount, groupCount: 0, colorOrder: 'RGB', description: '' }, extra);
+  Object.assign({ startChannel: startChannel - 1, pixelCount, groupCount: 0, colorOrder: 'RGB', description: '' }, extra);
 const board = () => {
   const out = [];
   for (let n = 0; n < 48; n++) out.push(summarizePort({ portNumber: n, protocol: 'ws2811', virtualStrings: [vs(1 + n * 2400, 800)] }));

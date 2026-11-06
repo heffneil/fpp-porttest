@@ -16,12 +16,13 @@
   }
 
   // [first, last] channel (1-based, inclusive) a virtual string drives, or null
-  // when it has no pixels. A groupCount above 1 shares one node across that
+  // when it has no pixels. FPP stores a string's startChannel 0-based (the Pixel
+  // Strings page shows it +1), so channel = startChannel + 1. A groupCount above 1 shares one node across that
   // many pixels, rounding up.
   function stringRange(vs) {
     var pixels = Math.floor(Number(vs && vs.pixelCount));
     if (!(pixels > 0)) return null;
-    var start = Math.floor(Number(vs.startChannel));
+    var start = Math.floor(Number(vs.startChannel)) + 1;
     var group = Math.floor(Number(vs.groupCount));
     var nodes = group > 1 ? Math.ceil(pixels / group) : pixels;
     return [start, start + nodes * channelsPerNode(vs.colorOrder) - 1];
