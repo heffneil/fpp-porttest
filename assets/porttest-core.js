@@ -132,9 +132,9 @@
     return formatChannelSet(mergeRanges(ranges));
   }
 
-  // Port N lights its first 10 x N pixels (capped at its first string), so the
-  // lit stretch grows in clear steps from port to port, easy to see on a camera.
-  var PORT_NUMBER_STEP_PIXELS = 10;
+  // Port N lights its first N pixels (capped at its first string), like FPP's own
+  // Port Number test: count the lit pixels to read the port.
+  var PORT_NUMBER_STEP_PIXELS = 1;
   function portNumberRanges(sum) {
     if (!sum.hasPixels) return [];
     var end = Math.min(sum.firstStart + (sum.portNumber + 1) * PORT_NUMBER_STEP_PIXELS * sum.channelsPerNode - 1, sum.firstEnd);

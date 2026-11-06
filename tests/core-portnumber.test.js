@@ -12,23 +12,23 @@ const board = () => {
   return out;
 };
 
-test('port N lights its first 10 x N pixels', () => {
-  // port 5 (portNumber 4) starts at 9601: 50 pixels = 150 channels
-  assert.equal(portNumberChannelSet(board(), [4]), '9601-9750');
+test('port N lights its first N pixels', () => {
+  // port 5 (portNumber 4) starts at 9601: 5 pixels = 15 channels
+  assert.equal(portNumberChannelSet(board(), [4]), '9601-9615');
 });
 
 test('several ports, each with its own count; adjacent results stay separate', () => {
-  assert.equal(portNumberChannelSet(board(), [0, 2]), '1-30;4801-4890');
+  assert.equal(portNumberChannelSet(board(), [0, 2]), '1-3;4801-4809');
 });
 
 test('length is capped at the first string', () => {
-  const s = [summarizePort({ portNumber: 9, virtualStrings: [vs(1, 4)] })]; // port 10 wants 100 pixels, has 4
+  const s = [summarizePort({ portNumber: 9, virtualStrings: [vs(1, 4)] })]; // port 10 wants 10 pixels, has 4
   assert.equal(portNumberChannelSet(s, [9]), '1-12');
 });
 
 test('RGBW uses four channels per pixel', () => {
   const s = [summarizePort({ portNumber: 2, virtualStrings: [vs(101, 50, { colorOrder: 'RGBW' })] })];
-  assert.equal(portNumberChannelSet(s, [2]), '101-220'); // port 3 = 30 px x 4
+  assert.equal(portNumberChannelSet(s, [2]), '101-112'); // port 3 = 3 px x 4
 });
 
 test('uses the lowest-start string; ports with no pixels and unselected ports add nothing', () => {
@@ -37,7 +37,7 @@ test('uses the lowest-start string; ports with no pixels and unselected ports ad
     summarizePort({ portNumber: 1, virtualStrings: [] }),
     summarizePort({ portNumber: 2, virtualStrings: [vs(1000, 10)] }),
   ];
-  assert.equal(portNumberChannelSet(s, [0, 1]), '100-129');
+  assert.equal(portNumberChannelSet(s, [0, 1]), '100-102');
   assert.equal(portNumberChannelSet(s, []), '');
 });
 
