@@ -1,0 +1,636 @@
+{
+  "channelOutputs": [
+    {
+      "type": "BBB48String",
+      "subType": "F8-B",
+      "enabled": 1,
+      "outputs": [
+        {
+          "portNumber": 0,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 1,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 1,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 2401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 2,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 4801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 3,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 7201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 4,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 9601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 5,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 12001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 6,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 14401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 7,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 16801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 8,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 19201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 9,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 21601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 10,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 24001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 11,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 26401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 12,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 28801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 13,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 31201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 14,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 33601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 15,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 36001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 16,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 38401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 17,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 40801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 18,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 43201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 19,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 45601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 20,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 48001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 21,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 50401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 22,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 52801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 23,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 55201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 24,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 57601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 25,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 60001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 26,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 62401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 27,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 64801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 28,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 67201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 29,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 69601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 30,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 72001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 31,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 74401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 32,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 76801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 33,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 79201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 34,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 81601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 35,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 84001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 36,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 86401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 37,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 88801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 38,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 91201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 39,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 93601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 40,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 96001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 41,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 98401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 42,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 100801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 43,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 103201,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 44,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 105601,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 45,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 108001,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 46,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 110401,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        },
+        {
+          "portNumber": 47,
+          "protocol": "ws2811",
+          "virtualStrings": [
+            {
+              "startChannel": 112801,
+              "pixelCount": 800,
+              "groupCount": 1,
+              "colorOrder": "RGB",
+              "description": ""
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "status": "OK"
+}
