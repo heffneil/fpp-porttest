@@ -58,10 +58,77 @@
     return ranges.map(function (r) { return r[0] + '-' + r[1]; }).join(';');
   }
 
+  // What the page shows for one port. description is the first non-empty string
+  // description, returned as-is: rendering it safely is the UI's job.
+  function summarizePort(port) {
+    var ranges = portRanges(port);
+    var strings = (port && port.virtualStrings) || [];
+    var pixels = 0;
+    var description = '';
+    strings.forEach(function (vs) {
+      if (stringRange(vs)) pixels += Math.floor(Number(vs.pixelCount));
+      if (!description && typeof vs.description === 'string' && vs.description !== '') {
+        description = vs.description;
+      }
+    });
+    var number = Math.floor(Number(port && port.portNumber));
+    return {
+      portNumber: number,
+      label: String(number + 1),
+      protocol: (port && typeof port.protocol === 'string') ? port.protocol : '',
+      description: description,
+      startChannel: ranges.length ? ranges[0][0] : null,
+      endChannel: ranges.length ? ranges[ranges.length - 1][1] : null,
+      pixelCount: pixels,
+      ranges: ranges,
+      hasPixels: ranges.length > 0
+    };
+  }
+
+  // For each port, the other ports that share any channel with it. Ports with
+  // no pixels never appear.
+  function findOverlaps(summaries) {
+    var out = {};
+    for (var i = 0; i < summaries.length; i++) {
+      for (var j = i + 1; j < summaries.length; j++) {
+        var a = summaries[i], b = summaries[j];
+        if (!a.hasPixels || !b.hasPixels) continue;
+        if (rangesIntersect(a.ranges, b.ranges)) {
+          (out[a.portNumber] = out[a.portNumber] || []).push(b.portNumber);
+          (out[b.portNumber] = out[b.portNumber] || []).push(a.portNumber);
+        }
+      }
+    }
+    return out;
+  }
+
+  function rangesIntersect(xs, ys) {
+    for (var i = 0; i < xs.length; i++) {
+      for (var j = 0; j < ys.length; j++) {
+        if (xs[i][0] <= ys[j][1] && ys[j][0] <= xs[i][1]) return true;
+      }
+    }
+    return false;
+  }
+
+  // The channel set for the ticked ports: their ranges, merged.
+  function selectionChannelSet(summaries, selected) {
+    var chosen = {};
+    selected.forEach(function (n) { chosen[n] = true; });
+    var ranges = [];
+    summaries.forEach(function (s) {
+      if (chosen[s.portNumber]) ranges = ranges.concat(s.ranges);
+    });
+    return formatChannelSet(mergeRanges(ranges));
+  }
+
   return {
     stringRange: stringRange,
     mergeRanges: mergeRanges,
     portRanges: portRanges,
-    formatChannelSet: formatChannelSet
+    formatChannelSet: formatChannelSet,
+    summarizePort: summarizePort,
+    findOverlaps: findOverlaps,
+    selectionChannelSet: selectionChannelSet
   };
 });
