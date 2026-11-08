@@ -164,7 +164,7 @@
     'R-G-B', 'R-G-B-All', 'R-G-B-None', 'R-G-B-All-None',
     'R-G-B-W', 'R-G-B-W-All', 'R-G-B-W-None', 'R-G-B-W-All-None'
   ];
-  var DEFAULT_COLOR = '#404040';
+  var DEFAULT_COLOR = '#ff0000';
   var DEFAULT_INTERVAL_MS = 1000;
 
   // The Test Start command body for POST /api/command. Only the channel-based

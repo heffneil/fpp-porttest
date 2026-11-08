@@ -58,7 +58,7 @@ test('buildTestStop', () => {
 });
 
 test('defaults and chase types', () => {
-  assert.equal(core.DEFAULT_COLOR, '#404040');
+  assert.equal(core.DEFAULT_COLOR, '#ff0000');
   assert.equal(core.DEFAULT_INTERVAL_MS, 1000);
   assert.equal(core.CHASE_TYPES.length, 8);
   assert.ok(core.CHASE_TYPES.includes('R-G-B-W-All-None'));
