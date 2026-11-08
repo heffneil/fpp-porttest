@@ -1,6 +1,6 @@
 # Multi-range hardware spike: results
 
-Date: 2026-11-06. Script: `scripts/dev/spike_multirange.py`.
+Date: 2026-11-06. Script: `scripts/dev/spike_multirange.py` (removed from the plugin afterwards: the listing linter flags any shipped code that sends over the network; it is in git history, commit 4946d3e).
 
 ## Question
 
