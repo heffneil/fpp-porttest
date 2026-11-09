@@ -178,6 +178,9 @@
     table.appendChild(tbody);
 
     var wrap = el('div', 'table-responsive');
+    // Explicit, not just the class: FPP's Bootstrap build may not ship the rule,
+    // and a phone-width screen must scroll the table, not the page.
+    wrap.style.overflowX = 'auto';
     wrap.appendChild(table);
     rootEl.appendChild(controls);
     rootEl.appendChild(hint);
