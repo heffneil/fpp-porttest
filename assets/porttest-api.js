@@ -64,7 +64,48 @@
       });
     }
 
-    return { getOutput: getOutput, getTesting: getTesting, command: command };
+    // Names of the effects fppd is playing right now.
+    function getRunningEffects() {
+      return getJson('/api/fppd/effects').then(function (body) {
+        var list = body && Array.isArray(body.runningEffects) ? body.runningEffects : [];
+        return list.map(function (e) { return e && e.name; }).filter(function (n) { return typeof n === 'string'; });
+      });
+    }
+
+    // Names (no extension) of the sequences on the board.
+    function listSequences() {
+      return getJson('/api/sequence').then(function (body) { return Array.isArray(body) ? body : []; });
+    }
+
+    // FPP answers a file write with JSON {status: 'OK', ...}; anything else is a failure.
+    function fileResult(resp) {
+      return resp.text().then(function (text) {
+        if (!resp.ok) throw new Error(text ? text : 'FPP answered ' + resp.status);
+        var parsed = null;
+        try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
+        if (parsed && typeof parsed === 'object' && parsed.status && parsed.status !== 'OK') {
+          throw new Error(String(parsed.status));
+        }
+      });
+    }
+
+    function uploadSequence(name, bytes) {
+      return doFetch('/api/file/sequences/' + encodeURIComponent(name) + '.fseq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: bytes
+      }).then(fileResult);
+    }
+
+    function deleteSequence(name) {
+      return doFetch('/api/file/sequences/' + encodeURIComponent(name) + '.fseq', { method: 'DELETE' }).then(fileResult);
+    }
+
+    return {
+      getOutput: getOutput, getTesting: getTesting, command: command,
+      getRunningEffects: getRunningEffects, listSequences: listSequences,
+      uploadSequence: uploadSequence, deleteSequence: deleteSequence
+    };
   }
 
   return { createApi: createApi };

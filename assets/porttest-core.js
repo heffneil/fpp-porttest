@@ -20,12 +20,21 @@
   // Strings page shows it +1), so channel = startChannel + 1. A groupCount above 1 shares one node across that
   // many pixels, rounding up.
   function stringRange(vs) {
+    var info = stringInfo(vs);
+    return info ? [info.start, info.start + info.nodes * info.channelsPerNode - 1] : null;
+  }
+
+  // One virtual string as {start (first channel, 1-based), nodes, channelsPerNode},
+  // or null when it has no pixels.
+  function stringInfo(vs) {
     var pixels = Math.floor(Number(vs && vs.pixelCount));
     if (!(pixels > 0)) return null;
-    var start = Math.floor(Number(vs.startChannel)) + 1;
     var group = Math.floor(Number(vs.groupCount));
-    var nodes = group > 1 ? Math.ceil(pixels / group) : pixels;
-    return [start, start + nodes * channelsPerNode(vs.colorOrder) - 1];
+    return {
+      start: Math.floor(Number(vs.startChannel)) + 1,
+      nodes: group > 1 ? Math.ceil(pixels / group) : pixels,
+      channelsPerNode: channelsPerNode(vs.colorOrder)
+    };
   }
 
   // Sort and merge overlapping or touching ranges.
@@ -73,16 +82,13 @@
       }
     });
     var number = Math.floor(Number(port && port.portNumber));
-    // The lowest-start string with pixels: where a port-number test lights up.
-    var first = null;
+    var infos = [];
     strings.forEach(function (vs) {
-      var r = stringRange(vs);
-      if (r && (!first || r[0] < first.range[0])) first = { range: r, cpn: channelsPerNode(vs.colorOrder) };
+      var info = stringInfo(vs);
+      if (info) infos.push(info);
     });
     return {
-      firstStart: first ? first.range[0] : null,
-      firstEnd: first ? first.range[1] : null,
-      channelsPerNode: first ? first.cpn : 3,
+      strings: infos,
       portNumber: number,
       label: String(number + 1),
       protocol: (port && typeof port.protocol === 'string') ? port.protocol : '',
@@ -132,25 +138,6 @@
     return formatChannelSet(mergeRanges(ranges));
   }
 
-  // Port N lights its first N pixels (capped at its first string), like FPP's own
-  // Port Number test: count the lit pixels to read the port.
-  var PORT_NUMBER_STEP_PIXELS = 1;
-  function portNumberRanges(sum) {
-    if (!sum.hasPixels) return [];
-    var end = Math.min(sum.firstStart + (sum.portNumber + 1) * PORT_NUMBER_STEP_PIXELS * sum.channelsPerNode - 1, sum.firstEnd);
-    return [[sum.firstStart, end]];
-  }
-
-  function portNumberChannelSet(summaries, selected) {
-    var chosen = {};
-    selected.forEach(function (n) { chosen[n] = true; });
-    var ranges = [];
-    summaries.forEach(function (sum) {
-      if (chosen[sum.portNumber]) ranges = ranges.concat(portNumberRanges(sum));
-    });
-    return formatChannelSet(mergeRanges(ranges));
-  }
-
   // FPP lists every output the driver supports, but a cape may have fewer
   // physical ports. K32A-B: 32 direct ports (33-48 are its differential outputs).
   var DIRECT_PORTS = { 'K32A-B': 32 };
@@ -159,7 +146,7 @@
     return Math.max(1, Math.min(total, known));
   }
 
-  var PATTERNS = { solid: 'RGB Single Color', portnumber: 'RGB Single Color', chase: 'RGB Chase', cycle: 'RGB Cycle' };
+  var PATTERNS = { solid: 'RGB Single Color', chase: 'RGB Chase', cycle: 'RGB Cycle' };
   var CHASE_TYPES = [
     'R-G-B', 'R-G-B-All', 'R-G-B-None', 'R-G-B-All-None',
     'R-G-B-W', 'R-G-B-W-All', 'R-G-B-W-None', 'R-G-B-W-All-None'
@@ -167,8 +154,8 @@
   var DEFAULT_COLOR = '#ff0000';
   var DEFAULT_INTERVAL_MS = 1000;
 
-  // The Test Start command body for POST /api/command. Only the channel-based
-  // effects are ever built: Output Specific cannot be limited to ports.
+  // The Test Start command body for POST /api/command (Solid, Chase, Cycle).
+  // Output Specific is never used: it cannot be limited to ports.
   function buildTestStart(opts) {
     var ms = Math.floor(Number(opts.intervalMs));
     if (!(ms >= 0)) ms = DEFAULT_INTERVAL_MS;
@@ -255,12 +242,8 @@
     }
 
     var ports = match(function (sum) { return sum.ranges; });
-    if (!ports && pattern === 'solid') {
-      ports = match(portNumberRanges);
-      if (ports) pattern = 'portnumber';
-    }
     if (!ports) {
-      return { kind: 'other', reason: 'The running test does not match whole ports or port numbers.' };
+      return { kind: 'other', reason: 'The running test does not match whole ports.' };
     }
 
     var value = pattern !== 'chase' && pattern !== 'cycle'
@@ -281,12 +264,12 @@
     chaseTypeFromSubMode: chaseTypeFromSubMode,
     recognise: recognise,
     stringRange: stringRange,
+    stringInfo: stringInfo,
     mergeRanges: mergeRanges,
     portRanges: portRanges,
     formatChannelSet: formatChannelSet,
     summarizePort: summarizePort,
     findOverlaps: findOverlaps,
-    selectionChannelSet: selectionChannelSet,
-    portNumberChannelSet: portNumberChannelSet
+    selectionChannelSet: selectionChannelSet
   };
 });

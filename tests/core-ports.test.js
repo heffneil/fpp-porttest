@@ -87,3 +87,18 @@ test('defaultPortLimit: K32A-B has 32 direct ports; anything else shows them all
   assert.equal(defaultPortLimit('SomethingElse', 48), 48);
   assert.equal(defaultPortLimit(undefined, 16), 16);
 });
+
+test('summarizePort lists a port\'s strings in config order, skipping empty ones', () => {
+  const s = summarizePort(port(2, [
+    vs(4801, 100),
+    vs(1, 0),
+    Object.assign(vs(1, 10), { groupCount: 3 }),
+    Object.assign(vs(9001, 20), { colorOrder: 'RGBW' }),
+  ]));
+  assert.deepEqual(s.strings, [
+    { start: 4801, nodes: 100, channelsPerNode: 3 },
+    { start: 1, nodes: 4, channelsPerNode: 3 },
+    { start: 9001, nodes: 20, channelsPerNode: 4 },
+  ]);
+  assert.deepEqual(summarizePort(port(0, [])).strings, []);
+});

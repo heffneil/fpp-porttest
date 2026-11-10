@@ -1,6 +1,7 @@
 /* Port Test UI. Bootstrap classes only, no colours of its own. Every string that
  * comes from the board (descriptions especially) is set with textContent, never
- * innerHTML. Needs PortTestCore and PortTestUpdater loaded first.
+ * innerHTML. Needs PortTestCore, PortTestUpdater, PortTestFseq and PortTestRunner
+ * loaded first.
  *
  * A test started here stays lit until it is turned off: nothing here stops a
  * test on page close or unload. */
@@ -49,6 +50,8 @@
 
   function build(rootEl, ports, api, subType) {
     var core = root.PortTestCore;
+    var fx = root.PortTestFseq;
+    var runner = root.PortTestRunner.createRunner({ api: api });
     var summaries = ports.map(core.summarizePort)
       .sort(function (a, b) { return a.portNumber - b.portNumber; });
     var overlaps = core.findOverlaps(summaries);
@@ -63,7 +66,11 @@
     patternLabel.htmlFor = 'ptPattern';
     var pattern = el('select', 'form-select w-auto');
     pattern.id = 'ptPattern';
-    [['off', 'Off'], ['solid', 'Solid color'], ['portnumber', 'Port number'], ['chase', 'RGB Chase'], ['cycle', 'RGB Cycle']].forEach(function (o) {
+    // FPP's own Testing dropdown first, in its order; then the plain channel tests.
+    var patternChoices = [['off', 'Off']]
+      .concat(fx.KINDS.map(function (k) { return [k.id, k.label]; }))
+      .concat([['solid', 'Solid color'], ['chase', 'RGB Chase'], ['cycle', 'RGB Cycle']]);
+    patternChoices.forEach(function (o) {
       var opt = el('option', '', o[1]);
       opt.value = o[0];
       pattern.appendChild(opt);
@@ -205,6 +212,12 @@
       return pattern.value === 'chase' || pattern.value === 'cycle' ? chaseType.value : color.value;
     }
 
+    // Port Number, Pixel Count and the fades play as an effect file; Solid, Chase
+    // and Cycle use FPP's channel test.
+    function isEffectPattern(v) {
+      return fx.KINDS.some(function (k) { return k.id === v; });
+    }
+
     function showError(text) {
       error.textContent = text;
       show(error, text !== '');
@@ -234,7 +247,7 @@
         ? 'Testing ' + testingPorts.length + ' of ' + limitValue() + ' ports'
         : '';
 
-      show(color, pattern.value === 'solid' || pattern.value === 'portnumber');
+      show(color, pattern.value === 'solid');
       show(chaseType, pattern.value === 'chase' || pattern.value === 'cycle');
 
       var needTick = pattern.value !== 'off' && ticked === 0;
@@ -244,27 +257,41 @@
     // ---- talking to the board ---------------------------------------------
     var lastOp = 'start';
 
+    function stopChannelTest() {
+      if (!lit) return Promise.resolve();
+      return api.command(core.buildTestStop()).then(function () { lit = false; });
+    }
+
     function send(selection) {
       if (pattern.value === 'off' || selection.length === 0) {
-        if (!lit) return Promise.resolve();
+        if (!lit && !runner.active()) return Promise.resolve();
         lastOp = 'stop';
-        return api.command(core.buildTestStop()).then(function () {
-          lit = false;
+        return runner.stop().then(stopChannelTest).then(function () {
           testingPorts = null;
           render();
         });
       }
       lastOp = 'start';
       showError('');
-      lit = true; // even a failed start may have left something running
-      var body = core.buildTestStart({
-        pattern: pattern.value,
-        channelSet: pattern.value === 'portnumber'
-          ? core.portNumberChannelSet(summaries, selection)
-          : core.selectionChannelSet(summaries, selection),
-        value: currentValue()
-      });
-      return api.command(body).then(function () {
+      if (isEffectPattern(pattern.value)) {
+        // FPP runs one channel test at a time and it would sit under the effect.
+        return stopChannelTest().then(function () {
+          return runner.apply(fx.buildEffect(summaries, selection, pattern.value));
+        }).then(function () {
+          testingPorts = selection;
+          show(notice, false);
+          render();
+        });
+      }
+      return runner.stop().then(function () {
+        lit = true; // even a failed start may have left something running
+        var body = core.buildTestStart({
+          pattern: pattern.value,
+          channelSet: core.selectionChannelSet(summaries, selection),
+          value: currentValue()
+        });
+        return api.command(body);
+      }).then(function () {
         testingPorts = selection;
         show(notice, false);
         render();
@@ -302,11 +329,7 @@
       try { localStorage.setItem('porttest.limit', String(limitValue())); } catch (e) { /* not saved */ }
       userChanged();
     });
-    pattern.addEventListener('change', function () {
-      // The default dim grey is hard to see on a few pixels; Port number starts white.
-      if (pattern.value === 'portnumber' && color.value === core.DEFAULT_COLOR) color.value = '#ffffff';
-      userChanged();
-    });
+    pattern.addEventListener('change', userChanged);
     color.addEventListener('input', userChanged);
     chaseType.addEventListener('change', userChanged);
 
@@ -324,22 +347,44 @@
 
     // ---- pick up a test that is already running ---------------------------
     var handle = { getSelection: getSelection };
-    return api.getTesting().then(function (body) {
-      var found = core.recognise(summaries, body);
-      if (found.kind === 'ours') {
-        rows.forEach(function (r) { r.box.checked = found.ports.indexOf(r.summary.portNumber) !== -1; });
-        pattern.value = found.pattern;
-        if (found.pattern === 'solid' || found.pattern === 'portnumber') color.value = found.value;
-        else chaseType.value = found.value;
-        testingPorts = found.ports;
-        lit = true;
+    function ticked(ports) {
+      rows.forEach(function (r) { r.box.checked = ports.indexOf(r.summary.portNumber) !== -1; });
+      testingPorts = ports;
+    }
+
+    return Promise.all([
+      api.getTesting().catch(function () { return null; }),
+      api.getRunningEffects().catch(function () { return []; })
+    ]).then(function (res) {
+      // An effect of ours, named for its pattern and ports, is the whole state.
+      var mine = null;
+      res[1].forEach(function (name) {
+        var parsed = mine ? null : fx.parseEffectName(name);
+        var known = parsed && parsed.ports.every(function (n) {
+          return summaries.some(function (s) { return s.portNumber === n; });
+        });
+        if (known) mine = { name: name, parsed: parsed };
+      });
+      if (mine) {
+        runner.adopt(mine.name);
+        pattern.value = mine.parsed.kind;
+        ticked(mine.parsed.ports);
         render();
-      } else if (found.kind === 'other') {
-        show(notice, true);
+      } else {
+        var found = res[0] ? core.recognise(summaries, res[0]) : { kind: 'none' };
+        if (found.kind === 'ours') {
+          pattern.value = found.pattern;
+          if (found.pattern === 'solid') color.value = found.value;
+          else chaseType.value = found.value;
+          ticked(found.ports);
+          lit = true;
+          render();
+        } else if (found.kind === 'other') {
+          show(notice, true);
+        }
       }
+      runner.clean().catch(function () { /* leftover files are only clutter */ });
       return handle;
-    }, function () {
-      return handle; // can't tell what is running; the page still works
     });
   }
 

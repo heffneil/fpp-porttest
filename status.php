@@ -14,7 +14,7 @@ $flags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
 <script>window.PORTTEST_CONFIG = <?php echo json_encode($boot, $flags); ?>;</script>
 <div id="porttest"></div>
 <?php
-foreach (['core', 'updater', 'api', 'ui'] as $part) {
+foreach (['core', 'updater', 'api', 'fseq', 'runner', 'ui'] as $part) {
     if (is_readable(__DIR__ . '/assets/porttest-' . $part . '.js')) {
         echo "<script>\n";
         readfile(__DIR__ . '/assets/porttest-' . $part . '.js');

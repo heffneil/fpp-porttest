@@ -2,7 +2,7 @@
 
 An [FPP](https://github.com/FalconChristmas/fpp) plugin for finding out which props are on which pixel port.
 
-Tick the ports you want, choose a test, and only those ports light. It uses FPP's own channel test, so nothing is stored and no sequence or configuration changes. This is handy at commissioning time, when props are not assigned in xLights yet and there is nothing to send channel data to. Give every port 800 pixels on the Pixel Strings page, then turn ports on and off one at a time.
+Tick the ports you want, choose a test, and only those ports light. It plays FPP's own test patterns on just those ports, so no sequence or configuration changes. This is handy at commissioning time, when props are not assigned in xLights yet and there is nothing to send channel data to. Give every port 800 pixels on the Pixel Strings page, then turn ports on and off one at a time.
 
 ## Install
 
@@ -18,14 +18,16 @@ Port Test appears under **Status/Control**.
 
 1. Open **Status/Control → Port Test**. Every pixel-string port is listed with its channels and pixel count.
 2. Tick the ports you want. The checkbox in the header selects all of them. Tapping anywhere on a row ticks it.
-3. Pick a pattern next to **Testing:** (Solid color, Port number, RGB Chase or RGB Cycle). *Port number* lights the first N pixels of port N (port 5 lights 5 white pixels), like FPP's own Port Number test, so you can count them to read the port. Ticked ports light and turn green in the list; the status reads "Testing N of M ports".
+3. Pick a pattern next to **Testing:**. The first seven are FPP's own Testing menu: *Port Number* (port 5 lights 5 white pixels and the rest of the port cycles red, green, blue, so you can count to read the port), *Pixel Count by Port*, *Pixel Count by String*, and the Red, Green, Blue and White *Fade*. Solid color, RGB Chase and RGB Cycle follow. Ticked ports light and turn green in the list; the status reads "Testing N of M ports".
 4. Tick or untick ports while it runs and the lit set follows. Choose **Off** to stop.
 
 A test stays lit until you turn it off. Reloading the page does not stop it, and the page picks it up again when it loads.
 
 ## Limits
 
-- It runs channel patterns only. FPP's pixel-string tests (Port Number, Pixel Count and the fades) cannot be limited to chosen ports.
+- The first seven patterns play from a temporary `porttest_*.fseq` file in the sequences folder. It is deleted when you turn the test off, but a test left running keeps its file until then.
+- They are written in channel order, before each string's color order is applied, so red is always the first channel of a node. FPP's own Port Number test writes after color order, so on a GRB string its "red" is really green; this plugin shows the true color.
+- On a grouped string (group count above 1) each node counts as one pixel, not each pixel in the group.
 - Ports must not share channels. If two do, lighting one lights the other; the page flags this with a badge.
 - Cape port labels (such as "P1-3") are not shown. Ports are numbered 1 upwards.
 - A port with no pixels cannot be ticked. Set a pixel count on the Pixel Strings page.

@@ -10,7 +10,9 @@
  *
  *   GET /harness/fixture?name=normal|edge|disabled   choose the board layout
  *   GET /harness/seed?name=none|ports2and5|other    set what test is "running"
+ *   GET /harness/seed?name=effect                    an effect file of ours "already playing"
  *   GET /harness/fail?on=1|0                         make POST /api/command answer 500
+ *   GET /harness/noplay?on=1|0                       FSEQ Effect Start answers but never plays
  *   GET /requests                                    every API request, newest last
  *   GET /reset                                       clear the log
  *
@@ -24,6 +26,27 @@ $LOG = $WORK . '/requests.log';
 $FIXTURE_FILE = $WORK . '/fixture';
 $TESTING_FILE = $WORK . '/testing.json';
 $FAIL_FILE = $WORK . '/fail';
+$SEQ_DIR = $WORK . '/sequences';
+$EFFECTS_FILE = $WORK . '/effects.json';
+$NOPLAY_FILE = $WORK . '/noplay';
+@mkdir($SEQ_DIR, 0777, true);
+
+function runningEffects()
+{
+    global $EFFECTS_FILE;
+    $list = is_readable($EFFECTS_FILE) ? json_decode((string) file_get_contents($EFFECTS_FILE), true) : [];
+    return is_array($list) ? array_values($list) : [];
+}
+function setRunningEffects($list)
+{
+    global $EFFECTS_FILE;
+    file_put_contents($EFFECTS_FILE, json_encode(array_values($list)));
+}
+function seqPath($name)
+{
+    global $SEQ_DIR;
+    return $SEQ_DIR . '/' . basename($name);
+}
 
 $FIXTURES = [
     'normal' => 'co-bbbStrings.json',
@@ -91,6 +114,14 @@ function chasePattern($type)
 if ($uri === '/harness/seed') {
     $name = $_GET['name'] ?? '';
     header('Content-Type: text/plain');
+    if ($name === 'effect') {
+        // Port Number on ports 3 and 6, as the page names its files.
+        file_put_contents(seqPath('porttest_pn_3_6.fseq'), 'x');
+        setRunningEffects(['porttest_pn_3_6']);
+        file_put_contents($TESTING_FILE, json_encode(['enabled' => 0]));
+        echo "seed: effect\n";
+        exit;
+    }
     $seeds = [
         'none' => ['enabled' => 0],
         // Ports labelled 2 and 5 on the normal fixture, in the shape of tests/fixtures/testing-running-fill.json.
@@ -116,9 +147,34 @@ if ($uri === '/harness/fail') {
     exit;
 }
 
+if ($uri === '/harness/noplay') {
+    file_put_contents($NOPLAY_FILE, ($_GET['on'] ?? '0') === '1' ? '1' : '0');
+    header('Content-Type: text/plain');
+    echo "noplay: " . (($_GET['on'] ?? '0') === '1' ? 'on' : 'off') . "\n";
+    exit;
+}
+
 if (str_starts_with($uri, '/api/')) {
     $raw = $_SERVER['REQUEST_METHOD'] === 'POST' ? file_get_contents('php://input') : '';
-    file_put_contents($LOG, $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI'] . ($raw !== '' ? ' ' . $raw : '') . "\n", FILE_APPEND);
+    $isFile = str_starts_with($uri, '/api/file/');
+    file_put_contents($LOG, $_SERVER['REQUEST_METHOD'] . ' ' . $_SERVER['REQUEST_URI']
+        . ($isFile ? ($raw !== '' ? ' (' . strlen($raw) . ' bytes)' : '') : ($raw !== '' ? ' ' . $raw : '')) . "\n", FILE_APPEND);
+
+    // Sequence files: what FPP's /api/file/sequences/<name> does.
+    if (preg_match('#^/api/file/sequences/([^/]+)$#', $uri, $m)) {
+        header('Content-Type: application/json');
+        $name = urldecode($m[1]);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            file_put_contents(seqPath($name), $raw);
+            echo json_encode(['status' => 'OK', 'file' => $name, 'dir' => 'sequences', 'written' => (string) strlen($raw)]);
+            exit;
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+            @unlink(seqPath($name));
+            echo json_encode(['status' => 'OK', 'file' => $name, 'dir' => 'sequences']);
+            exit;
+        }
+    }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && $uri === '/api/command') {
         // FPP answers text/plain: 200 on success, 500 with the message on error.
@@ -130,6 +186,22 @@ if (str_starts_with($uri, '/api/')) {
         }
         $cmd = json_decode($raw, true);
         $args = is_array($cmd) ? ($cmd['args'] ?? []) : [];
+        if (($cmd['command'] ?? '') === 'FSEQ Effect Start') {
+            // FPP says "Effect Started" even when it cannot open the file; it only plays if it can.
+            $name = (string) ($args[0] ?? '');
+            $noplay = is_readable($NOPLAY_FILE) && trim((string) file_get_contents($NOPLAY_FILE)) === '1';
+            if (!$noplay && is_file(seqPath($name . '.fseq')) && !in_array($name, runningEffects(), true)) {
+                setRunningEffects(array_merge(runningEffects(), [$name]));
+            }
+            echo 'Effect Started';
+            exit;
+        }
+        if (($cmd['command'] ?? '') === 'Effect Stop') {
+            $name = (string) ($args[0] ?? '');
+            setRunningEffects(array_filter(runningEffects(), function ($n) use ($name) { return $n !== $name; }));
+            echo 'Effect Stopped';
+            exit;
+        }
         if (($cmd['command'] ?? '') === 'Test Stop') {
             file_put_contents($TESTING_FILE, json_encode(['enabled' => 0]));
             echo 'Test Stopped';
@@ -163,6 +235,22 @@ if (str_starts_with($uri, '/api/')) {
     }
 
     header('Content-Type: application/json');
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $uri === '/api/fppd/effects') {
+        $out = [];
+        foreach (runningEffects() as $i => $n) {
+            $out[] = ['id' => $i, 'name' => $n];
+        }
+        echo json_encode(['Status' => 'OK', 'Message' => '', 'respCode' => 200, 'runningEffects' => $out]);
+        exit;
+    }
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $uri === '/api/sequence') {
+        $names = [];
+        foreach (glob($SEQ_DIR . '/*.fseq') as $f) {
+            $names[] = basename($f, '.fseq');
+        }
+        echo json_encode($names);
+        exit;
+    }
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && $uri === '/api/fppd/testing') {
         echo json_encode(['Status' => 'OK', 'config' => testingConfig(), 'respCode' => 200]);
         exit;
@@ -194,6 +282,11 @@ if ($uri === '/requests') {
 }
 if ($uri === '/reset') {
     @unlink($LOG);
+    foreach (glob($SEQ_DIR . '/*') as $f) {
+        @unlink($f);
+    }
+    @unlink($EFFECTS_FILE);
+    @unlink($NOPLAY_FILE);
     header('Content-Type: text/plain');
     echo "cleared\n";
     exit;

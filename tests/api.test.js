@@ -70,3 +70,39 @@ test('command rejects a non-2xx with the response text', async () => {
 test('command rejects a JSON {Status:"Error"}', async () => {
   await assert.rejects(rig(reply(200, '{"Status":"Error","Message":"nope"}')).api.command({}), /nope/);
 });
+
+test('getRunningEffects returns the names of the effects fppd is playing', async () => {
+  const { api, calls } = rig(reply(200, '{"Status":"OK","runningEffects":[{"id":0,"name":"porttest_pn_5"},{"id":2,"name":"x"}]}'));
+  assert.deepEqual(await api.getRunningEffects(), ['porttest_pn_5', 'x']);
+  assert.equal(calls[0].url, '/api/fppd/effects');
+  assert.deepEqual(await rig(reply(200, '{"Status":"OK"}')).api.getRunningEffects(), []);
+});
+
+test('listSequences returns the sequence names', async () => {
+  const { api, calls } = rig(reply(200, '["a","porttest_pn_5"]'));
+  assert.deepEqual(await api.listSequences(), ['a', 'porttest_pn_5']);
+  assert.equal(calls[0].url, '/api/sequence');
+  assert.deepEqual(await rig(reply(200, '{"x":1}')).api.listSequences(), []);
+});
+
+test('uploadSequence POSTs the raw bytes to sequences/<name>.fseq', async () => {
+  const { api, calls } = rig(reply(200, '{"status":"OK"}'));
+  const bytes = new Uint8Array([1, 2, 3]);
+  await api.uploadSequence('porttest_pn_5', bytes);
+  assert.equal(calls[0].url, '/api/file/sequences/porttest_pn_5.fseq');
+  assert.equal(calls[0].init.method, 'POST');
+  assert.equal(calls[0].init.body, bytes);
+  assert.equal(calls[0].init.headers['Content-Type'], 'application/octet-stream');
+});
+
+test('uploadSequence rejects when FPP says it did not write the file', async () => {
+  await assert.rejects(rig(reply(500, 'disk full')).api.uploadSequence('n', new Uint8Array(1)), /disk full/);
+  await assert.rejects(rig(reply(200, '{"status":"Invalid Directory"}')).api.uploadSequence('n', new Uint8Array(1)), /Invalid Directory/);
+});
+
+test('deleteSequence DELETEs sequences/<name>.fseq', async () => {
+  const { api, calls } = rig(reply(200, '{"status":"OK"}'));
+  await api.deleteSequence('porttest_pn_5');
+  assert.equal(calls[0].url, '/api/file/sequences/porttest_pn_5.fseq');
+  assert.equal(calls[0].init.method, 'DELETE');
+});
