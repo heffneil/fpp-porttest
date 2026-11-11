@@ -110,7 +110,7 @@
       if (node.indexInPort <= node.portNumber) {
         for (i = 0; i < cpn; i++) out[at + i] = 255;
       } else {
-        var rgb = RGB[['R', 'G', 'B'][Math.floor(frame / 8) % 3]];
+        var rgb = RGB[['R', 'G', 'B'][Math.floor(frame / 16) % 3]];
         for (i = 0; i < Math.min(cpn, 3); i++) out[at + i] = rgb[i];
       }
     } else if (kind.id === 'pixelcount_port' || kind.id === 'pixelcount_string') {
@@ -133,7 +133,7 @@
 
   // Frames and the time between them for each pattern.
   function timing(kind) {
-    if (kind.id === 'portnumber') return { frames: 24, stepMs: 250 };   // 3 colours x 2 s; the step time is one byte, so at most 255
+    if (kind.id === 'portnumber') return { frames: 48, stepMs: 250 };   // 3 colours x 4 s; the step time is one byte, so at most 255
     if (kind.id.indexOf('fade_') === 0) return { frames: 20, stepMs: 100 }; // one 2 s fade
     return { frames: 2, stepMs: 250 };                                  // still
   }

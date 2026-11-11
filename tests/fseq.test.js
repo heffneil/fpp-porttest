@@ -65,20 +65,20 @@ test('sparse range starts are 0-based: channel 59683 is stored as 59682', () => 
   assert.equal(d.ranges[0].length, 1800);
 });
 
-test('Port Number: port N lights its first N pixels white, the rest cycle R, G, B every 2 seconds', () => {
+test('Port Number: port N lights its first N pixels white, the rest cycle R, G, B every 4 seconds', () => {
   const sums = [port(2, [vs(1, 20)])];
   const e = fx.buildEffect(sums, [2], 'portnumber');
   const d = decode(e.bytes);
-  assert.equal(d.frames * d.stepMs, 6000, 'three colours of 2 seconds each');
+  assert.equal(d.frames * d.stepMs, 12000, 'three colours of 4 seconds each');
   for (let f = 0; f < d.frames; f++) {
     for (let px = 0; px < 3; px++) assert.deepEqual(d.pixel(f, 1 + px * 3), WHITE, `frame ${f} pixel ${px}`);
   }
   const colourAt = (ms) => d.pixel(Math.floor(ms / d.stepMs), 1 + 3 * 3);
   assert.deepEqual(colourAt(0), RED);
-  assert.deepEqual(colourAt(1900), RED);
-  assert.deepEqual(colourAt(2000), GREEN);
-  assert.deepEqual(colourAt(4000), BLUE);
-  assert.deepEqual(colourAt(5900), BLUE);
+  assert.deepEqual(colourAt(3900), RED);
+  assert.deepEqual(colourAt(4000), GREEN);
+  assert.deepEqual(colourAt(8000), BLUE);
+  assert.deepEqual(colourAt(11900), BLUE);
   assert.deepEqual(d.pixel(0, 1 + 19 * 3), RED, 'the last pixel cycles too');
 });
 
