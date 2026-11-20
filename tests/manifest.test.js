@@ -70,3 +70,23 @@ test('install', () => {
     assert.equal(syntax.status, 0, file + ' has a syntax error: ' + syntax.stderr);
   }
 });
+
+// What FPP does for each menu (www/menu.inc list_plugin_entries): sets $plugin and
+// $menu, includes the plugin's menu.inc, and shows whatever it prints. A file that
+// only defines $menuEntries prints nothing and the plugin is in no menu at all.
+function menuHtml(menuType) {
+  const code = `$plugin = 'fpp-porttest'; $menu = ${JSON.stringify(menuType)}; include ${JSON.stringify(path.join(root, 'menu.inc'))};`;
+  const r = spawnSync('php', ['-r', code], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  return r.stdout;
+}
+
+test('menu.inc prints a link for Status/Control, Input/Output Setup and Help, and none for Content Setup', () => {
+  const link = (page, text) => new RegExp(`<li><a href='plugin\\.php\\?plugin=fpp-porttest&page=${page}'>${text}</a></li>`);
+  assert.match(menuHtml('status'), link('status\\.php', 'Port Test'));
+  assert.match(menuHtml('output'), link('status\\.php', 'Port Test'));
+  assert.match(menuHtml('help'), link('about\\.php', 'Port Test - Help'));
+  assert.equal(menuHtml('content').trim(), '', 'nothing under Content Setup');
+  assert.equal((menuHtml('output').match(/<li>/g) || []).length, 1, 'one entry per menu');
+});
+
