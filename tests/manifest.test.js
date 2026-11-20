@@ -39,6 +39,7 @@ test('privacy', () => {
 test('menu', () => {
   const menu = read('menu.inc');
   assert.equal((menu.match(/'type'\s*=>\s*'status'/g) || []).length, 1);
+  assert.equal((menu.match(/'type'\s*=>\s*'output'/g) || []).length, 1, 'listed under Input/Output Setup too');
   assert.equal((menu.match(/'type'\s*=>\s*'help'/g) || []).length, 1);
   assert.match(menu, /'page'\s*=>\s*'status\.php'/);
   assert.match(menu, /'page'\s*=>\s*'about\.php'/);
