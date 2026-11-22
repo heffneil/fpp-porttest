@@ -118,3 +118,27 @@ test('deleteSequence DELETEs sequences/<name>.fseq', async () => {
   assert.equal(calls[0].url, '/api/file/sequences/porttest_pn_5.fseq');
   assert.equal(calls[0].init.method, 'DELETE');
 });
+
+const bin = (bytes) => Object.assign(reply(200, ''), { arrayBuffer: () => Promise.resolve(new Uint8Array(bytes).buffer) });
+
+test('isOurSequence reads the file and checks it carries our marker', async () => {
+  const fx = require('../assets/porttest-fseq.js');
+  const { summarizePort } = require('../assets/porttest-core.js');
+  const sum = summarizePort({ portNumber: 0, virtualStrings: [{ startChannel: 0, pixelCount: 2, groupCount: 0, colorOrder: 'RGB' }] });
+  const ours = fx.buildEffect([sum], [0], 'portnumber').bytes;
+  const a = rig(bin(Array.from(ours)));
+  assert.equal(await a.api.isOurSequence('porttest_pn_1'), true);
+  assert.equal(a.calls[0].url, '/api/file/sequences/porttest_pn_1.fseq');
+  assert.equal(await rig(bin(new Array(64).fill(0))).api.isOurSequence('x'), false);
+  assert.equal(await rig(reply(404, 'nope')).api.isOurSequence('x'), false);
+});
+
+test('log POSTs one event to the plugin log page and never rejects', async () => {
+  const a = rig(reply(200, 'ok'));
+  await a.api.log('test_start', 'Port Number, ports 1,2');
+  assert.match(a.calls[0].url, /^\/plugin\.php\?plugin=fpp-porttest&page=log\.php&nopage=1$/);
+  assert.equal(a.calls[0].init.method, 'POST');
+  assert.deepEqual(JSON.parse(a.calls[0].init.body), { event: 'test_start', detail: 'Port Number, ports 1,2' });
+  const failing = createApi(() => Promise.reject(new Error('offline')));
+  await assert.doesNotReject(failing.log('x', 'y'));
+});

@@ -9,8 +9,12 @@ function board(opts) {
   opts = opts || {};
   const log = [];
   const files = new Set();
+  const foreign = new Set(opts.foreign || []); // files on the board that are not ours
+  foreign.forEach((n) => files.add(n));
   const playing = new Set();
   const api = {
+    listSequences: async () => Array.from(files),
+    isOurSequence: async (name) => files.has(name) && !foreign.has(name),
     uploadSequence: async (name) => {
       log.push('upload ' + name);
       if (opts.failUpload) throw new Error('disk full');
@@ -110,8 +114,30 @@ test('clean removes porttest files nobody is playing, and nothing else', async (
   const b = board();
   b.files.add('porttest_pn_5'); b.files.add('porttest_rf_9'); b.files.add('Halloween'); b.files.add('porttest_zz_1');
   b.playing.add('porttest_rf_9');
-  b.api.listSequences = async () => Array.from(b.files);
   await b.runner.clean();
   assert.deepEqual(b.log.sort(), ['delete porttest_pn_5']);
   assert.deepEqual(Array.from(b.files).sort(), ['Halloween', 'porttest_rf_9', 'porttest_zz_1']);
+});
+
+test('apply refuses to overwrite a sequence of the same name that is not ours', async () => {
+  const b = board({ foreign: ['porttest_pn_5'] });
+  await assert.rejects(b.runner.apply(effect('porttest_pn_5')), /already exists/);
+  assert.deepEqual(b.log, []);
+  assert.ok(b.files.has('porttest_pn_5'));
+  assert.equal(b.runner.active(), null);
+});
+
+test('apply replaces a leftover file of ours with the same name', async () => {
+  const b = board();
+  b.files.add('porttest_pn_5');
+  await b.runner.apply(effect('porttest_pn_5'));
+  assert.deepEqual(b.log, ['upload porttest_pn_5', 'FSEQ Effect Start porttest_pn_5']);
+});
+
+test('clean leaves a porttest-named file that is not ours', async () => {
+  const b = board({ foreign: ['porttest_pn_5'] });
+  b.files.add('porttest_rf_9');
+  await b.runner.clean();
+  assert.deepEqual(b.log, ['delete porttest_rf_9']);
+  assert.ok(b.files.has('porttest_pn_5'));
 });

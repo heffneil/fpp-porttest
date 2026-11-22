@@ -228,3 +228,14 @@ test('buildEffect names the file after the pattern and ports', () => {
   const e = fx.buildEffect([port(4, [vs(1, 10)])], [4], 'fade_red');
   assert.equal(e.name, 'porttest_rf_5');
 });
+
+test('isOurFile recognises the files buildEffect writes and nothing else', () => {
+  const e = fx.buildEffect([port(0, [vs(1, 3)])], [0], 'portnumber');
+  assert.equal(fx.isOurFile(e.bytes), true);
+  assert.equal(fx.isOurFile(e.bytes.slice(0, 32)), true);
+  const other = e.bytes.slice();
+  other[24] = 0x58;
+  assert.equal(fx.isOurFile(other), false);
+  assert.equal(fx.isOurFile(e.bytes.slice(0, 20)), false);
+  assert.equal(fx.isOurFile(new Uint8Array(64)), false);
+});

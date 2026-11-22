@@ -34,7 +34,15 @@
     // Plays `effect` ({name, bytes}) in place of whatever we were playing.
     function apply(effect) {
       if (active === effect.name) return Promise.resolve();
-      return api.uploadSequence(effect.name, effect.bytes).then(function () {
+      // Never overwrite a sequence of the same name that is not ours.
+      return api.listSequences().then(function (names) {
+        if (names.indexOf(effect.name) === -1) return;
+        return api.isOurSequence(effect.name).then(function (ours) {
+          if (!ours) throw new Error('A sequence named ' + effect.name + ' already exists and is not Port Test\'s. Rename or delete it, then try again.');
+        });
+      }).then(function () {
+        return api.uploadSequence(effect.name, effect.bytes);
+      }).then(function () {
         return api.command(fx.startCommand(effect.name)).then(function () {
           return confirmPlaying(effect.name, 0);
         }).catch(function (err) {
@@ -64,7 +72,9 @@
       return Promise.all([api.listSequences(), api.getRunningEffects()]).then(function (res) {
         var playing = res[1];
         var stale = res[0].filter(function (n) { return fx.parseEffectName(n) && playing.indexOf(n) === -1; });
-        return Promise.all(stale.map(function (n) { return ignoring(api.deleteSequence(n)); }));
+        return Promise.all(stale.map(function (n) {
+          return api.isOurSequence(n).then(function (ours) { return ours ? ignoring(api.deleteSequence(n)) : undefined; });
+        }));
       });
     }
 

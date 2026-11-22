@@ -17,7 +17,7 @@
     "remoteAccess": "none",
     "systemChanges": [],
     "closedCode": false,
-    "other": "Starts and stops test patterns through FPP's own local API: a temporary effect file named porttest_*.fseq is written to the sequences folder and deleted when the test is turned off, and FPP's channel test is used for Solid, Chase and Cycle. Uninstalling stops any test this plugin left running and deletes its test files."
+    "other": "Starts and stops test patterns through FPP's own local API: a temporary effect file named porttest_*.fseq is written to the sequences folder and deleted when the test is turned off, and FPP's channel test is used for Solid, Chase and Cycle. Events are logged to plugin-fpp-porttest.log in the logs folder, and a small marker file in the config folder records that a channel test is on. Uninstalling stops a test this plugin left running and deletes its test files, log and marker."
   },
   "versions": [
     {

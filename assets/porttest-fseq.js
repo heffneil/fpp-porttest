@@ -250,6 +250,18 @@
     };
   }
 
+  // True for a file this module wrote: the PSEQ magic and our 'PORTTEST' id
+  // (header bytes 24-31). `bytes` may be just the first 32 bytes of the file.
+  function isOurFile(bytes) {
+    if (!bytes || bytes.length < 32) return false;
+    var magic = 'PSEQ';
+    var i;
+    for (i = 0; i < 4; i++) if (bytes[i] !== magic.charCodeAt(i)) return false;
+    var id = 'PORTTEST';
+    for (i = 0; i < 8; i++) if (bytes[24 + i] !== id.charCodeAt(i)) return false;
+    return true;
+  }
+
   // The command bodies for POST /api/command. FPP adds .fseq to the name itself.
   function startCommand(name) {
     return { command: 'FSEQ Effect Start', multisyncCommand: false, multisyncHosts: '', args: [name, 'true', 'true'] };
@@ -267,6 +279,7 @@
     buildEffect: buildEffect,
     effectName: effectName,
     parseEffectName: parseEffectName,
+    isOurFile: isOurFile,
     startCommand: startCommand,
     stopCommand: stopCommand
   };

@@ -32,8 +32,9 @@ A test stays lit until you turn it off. Reloading the page does not stop it, and
 - Cape port labels (such as "P1-3") are not shown. Ports are numbered 1 upwards.
 - A port with no pixels cannot be ticked. Set a pixel count on the Pixel Strings page.
 - Only the first enabled pixel string output is listed; the page notes when there are more.
-- Off stops only this page's test, but "Stop it" (shown when a different test is running) and uninstalling send FPP's general Test Stop, which also stops a test started from FPP's own Testing menu.
-- Temporary files are named `porttest_*.fseq`; the plugin deletes any file with that name, so don't use it for your own sequences.
+- Off stops only this page's test, and uninstalling stops FPP's channel test only if Port Test started it. "Stop it" (shown when a different test is running) asks for confirmation first, since that test was started elsewhere.
+- Temporary files are named `porttest_*.fseq`. Port Test checks a file's header before replacing or deleting it, so it never touches a sequence of yours that happens to share that name; if one does, the page says so instead of starting.
+- Port Test writes `plugin-fpp-porttest.log` in FPP's logs folder (test starts and stops, errors; rolls over at 256 KB). Attach it when reporting a problem.
 - Tested on BeagleBone Black boards running FPP 10.3 and 10.4. Not yet tested on the nightly build or in light/dark themes side by side. Pi boards use `co-pixelStrings` and are untested.
 
 ## Privacy

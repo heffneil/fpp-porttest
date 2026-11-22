@@ -223,6 +223,15 @@
       return fx.KINDS.some(function (k) { return k.id === v; });
     }
 
+    // One line in the plugin's runtime log; never blocks or fails the page.
+    function note(event, detail) {
+      if (api.log) api.log(event, detail);
+    }
+    function describe(selection) {
+      var label = pattern.options[pattern.selectedIndex] ? pattern.options[pattern.selectedIndex].text : pattern.value;
+      return label + ', ports ' + selection.map(function (n) { return n + 1; }).join(',');
+    }
+
     function showError(text) {
       error.textContent = text;
       show(error, text !== '');
@@ -264,7 +273,7 @@
 
     function stopChannelTest() {
       if (!lit) return Promise.resolve();
-      return api.command(core.buildTestStop()).then(function () { lit = false; });
+      return api.command(core.buildTestStop()).then(function () { lit = false; note('channel_test_off', ''); });
     }
 
     function send(selection) {
@@ -272,6 +281,7 @@
         if (!lit && !runner.active()) return Promise.resolve();
         lastOp = 'stop';
         return runner.stop().then(stopChannelTest).then(function () {
+          note('test_stop', '');
           testingPorts = null;
           render();
         });
@@ -283,6 +293,7 @@
         return stopChannelTest().then(function () {
           return runner.apply(fx.buildEffect(summaries, selection, pattern.value));
         }).then(function () {
+          note('test_start', describe(selection));
           testingPorts = selection;
           show(notice, false);
           render();
@@ -290,6 +301,7 @@
       }
       return runner.stop().then(function () {
         lit = true; // even a failed start may have left something running
+        note('channel_test_on', describe(selection)); // marker: uninstall may stop FPP's channel test
         var body = core.buildTestStart({
           pattern: pattern.value,
           channelSet: core.selectionChannelSet(summaries, selection),
@@ -297,6 +309,7 @@
         });
         return api.command(body);
       }).then(function () {
+        note('test_start', describe(selection));
         testingPorts = selection;
         show(notice, false);
         render();
@@ -304,7 +317,9 @@
     }
 
     function onError(err) {
-      showError((lastOp === 'stop' ? 'Test Stop failed: ' : 'Test Start failed: ') + messageOf(err));
+      var text = (lastOp === 'stop' ? 'Test Stop failed: ' : 'Test Start failed: ') + messageOf(err);
+      note('error', text);
+      showError(text);
       if (lastOp === 'start') testingPorts = null;
       render();
     }
@@ -339,6 +354,10 @@
     chaseType.addEventListener('change', userChanged);
 
     noticeStop.addEventListener('click', function () {
+      // This is a test someone started elsewhere (FPP's own Testing menu, say).
+      if (typeof root.confirm === 'function' &&
+          !root.confirm('A test that was not started from Port Test is running. Stop it?')) return;
+      note('foreign_test_stopped', '');
       showError('');
       api.command(core.buildTestStop()).then(function () {
         lit = false;
@@ -383,6 +402,7 @@
           else chaseType.value = found.value;
           ticked(found.ports);
           lit = true;
+          note('channel_test_on', 'picked up a running test');
           render();
         } else if (found.kind === 'other') {
           show(notice, true);

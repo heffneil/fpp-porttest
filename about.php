@@ -15,7 +15,9 @@
 	<h3>Stays lit until you turn it off</h3>
 	<p>A test has no timeout. It runs until you press Off, so remember to stop it. The first seven patterns play from a small temporary file in FPP's sequences folder; Off deletes it.</p>
 	<h3>Stopping</h3>
-	<p>Off stops only the test this page started. The "Stop it" button, shown when a different test is running, and uninstalling Port Test both send FPP's general Test Stop, which also stops a test started from FPP's own Testing menu. Port Test's temporary files are named <code>porttest_*.fseq</code>; leave that name to the plugin.</p>
+	<p>Off stops only the test this page started, and uninstalling stops FPP's channel test only if Port Test started it. The "Stop it" button, shown when a different test is running, asks first, because that test was started elsewhere (FPP's own Testing menu, for example).</p>
+	<h3>Names and log</h3>
+	<p>Port Test's temporary files are named <code>porttest_*.fseq</code>. It will not overwrite or delete a sequence with that name that it did not create. What it does is recorded in <code>plugin-fpp-porttest.log</code> in FPP's logs folder, which helps when something goes wrong.</p>
 	<h3>Outputs</h3>
 	<p>Only the first enabled pixel string output is listed. If the board has more, the page says so.</p>
 	<h3>Shared channels</h3>

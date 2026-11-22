@@ -1,11 +1,11 @@
 /* Port Test API: thin wrappers over FPP's HTTP API. UMD. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
-    module.exports = factory();
+    module.exports = factory(require('./porttest-fseq.js'));
   } else {
-    root.PortTestApi = factory();
+    root.PortTestApi = factory(root.PortTestFseq);
   }
-})(typeof self !== 'undefined' ? self : this, function () {
+})(typeof self !== 'undefined' ? self : this, function (fx) {
   'use strict';
 
   function createApi(fetchFn) {
@@ -94,6 +94,31 @@
       });
     }
 
+    // Is this sequence a file Port Test wrote? Reads it and checks the header
+    // marker; a file that cannot be read is treated as not ours.
+    function isOurSequence(name) {
+      return doFetch('/api/file/sequences/' + encodeURIComponent(name) + '.fseq').then(function (resp) {
+        if (!resp.ok) return false;
+        return resp.arrayBuffer().then(function (buf) {
+          return fx.isOurFile(new Uint8Array(buf, 0, Math.min(32, buf.byteLength)));
+        });
+      }).catch(function () { return false; });
+    }
+
+    // One line in the plugin's runtime log (see log.php). Never rejects: a log
+    // that cannot be written must not get in the way of a test.
+    function log(event, detail) {
+      try {
+        return doFetch('/plugin.php?plugin=fpp-porttest&page=log.php&nopage=1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: String(event), detail: detail === undefined ? '' : String(detail) })
+        }).then(function () {}, function () {});
+      } catch (e) {
+        return Promise.resolve();
+      }
+    }
+
     function uploadSequence(name, bytes) {
       return doFetch('/api/file/sequences/' + encodeURIComponent(name) + '.fseq', {
         method: 'POST',
@@ -107,6 +132,7 @@
     }
 
     return {
+      isOurSequence: isOurSequence, log: log,
       getOutput: getOutput, getTesting: getTesting, command: command,
       getRunningEffects: getRunningEffects, listSequences: listSequences,
       uploadSequence: uploadSequence, deleteSequence: deleteSequence

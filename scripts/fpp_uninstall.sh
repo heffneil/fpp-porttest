@@ -4,12 +4,18 @@
 
 . ${FPPDIR}/scripts/common
 
-# Stop any test this plugin left running. Bounded, and a failure is not worth
+# Stop FPP's channel test only if this plugin started it: the page leaves a marker
+# file while its Solid/Chase/Cycle test is on, so a test the operator started from
+# FPP's own Testing menu is left alone. Bounded, and a failure is not worth
 # blocking removal over.
-curl -s --connect-timeout 2 --max-time 10 \
-     -X POST -H 'Content-Type: application/json' \
-     -d '{"command":"Test Stop","args":[]}' \
-     "http://localhost/api/command" >/dev/null 2>&1 || true
+MARKER="${MEDIADIR:-/home/fpp/media}/config/plugin.fpp-porttest.channeltest"
+if [ -f "${MARKER}" ]; then
+    curl -s --connect-timeout 2 --max-time 10 \
+         -X POST -H 'Content-Type: application/json' \
+         -d '{"command":"Test Stop","args":[]}' \
+         "http://localhost/api/command" >/dev/null 2>&1 || true
+    rm -f "${MARKER}"
+fi
 
 # Stop any test effect this plugin left playing and delete its temporary files.
 # Names are porttest_<pattern>_<ports>: letters, digits and underscores only.
@@ -26,5 +32,6 @@ for name in $(curl -s --connect-timeout 2 --max-time 10 "http://localhost/api/se
          "http://localhost/api/file/sequences/${name}.fseq" >/dev/null 2>&1 || true
 done
 
+rm -f "${LOGDIR:-/home/fpp/media/logs}/plugin-fpp-porttest.log" "${LOGDIR:-/home/fpp/media/logs}/plugin-fpp-porttest.log.1"
 echo "fpp-porttest uninstalled."
 exit 0

@@ -90,3 +90,68 @@ test('menu.inc prints a link for Status/Control, Input/Output Setup and Help, an
   assert.equal((menuHtml('output').match(/<li>/g) || []).length, 1, 'one entry per menu');
 });
 
+
+// ---- runtime log ------------------------------------------------------------
+const os = require('node:os');
+
+function logWrite(dirs, event, detail) {
+  const code = `require ${JSON.stringify(path.join(root, 'lib/log.inc'))}; ` +
+    `echo json_encode(porttest_log_write(${JSON.stringify(dirs.logs)}, ${JSON.stringify(dirs.media)}, ${JSON.stringify(event)}, ${JSON.stringify(detail)}));`;
+  const r = spawnSync('php', ['-r', code.replace('require ', 'require_once ')], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  return JSON.parse(r.stdout);
+}
+function tmpDirs() {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'porttest-'));
+  fs.mkdirSync(path.join(base, 'logs'));
+  fs.mkdirSync(path.join(base, 'media', 'config'), { recursive: true });
+  return { logs: path.join(base, 'logs'), media: path.join(base, 'media') };
+}
+
+test('log.inc appends one dated line per event to plugin-fpp-porttest.log', () => {
+  const d = tmpDirs();
+  assert.equal(logWrite(d, 'test_start', 'Port Number, ports 1,2'), true);
+  logWrite(d, 'test_stop', '');
+  const lines = fs.readFileSync(path.join(d.logs, 'plugin-fpp-porttest.log'), 'utf8').trim().split('\n');
+  assert.equal(lines.length, 2);
+  assert.match(lines[0], /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d test_start Port Number, ports 1,2$/);
+  assert.match(lines[1], / test_stop$/);
+});
+
+test('log.inc rejects odd event names and flattens control characters and long detail', () => {
+  const d = tmpDirs();
+  assert.equal(logWrite(d, '../x', 'a'), false);
+  assert.equal(logWrite(d, '', 'a'), false);
+  assert.equal(fs.existsSync(path.join(d.logs, 'plugin-fpp-porttest.log')), false);
+  logWrite(d, 'note', 'a\nb\r\tc' + 'z'.repeat(500));
+  const text = fs.readFileSync(path.join(d.logs, 'plugin-fpp-porttest.log'), 'utf8');
+  assert.equal(text.trim().split('\n').length, 1);
+  assert.ok(text.length < 260);
+});
+
+test('log.inc keeps the log from growing without bound', () => {
+  const d = tmpDirs();
+  const file = path.join(d.logs, 'plugin-fpp-porttest.log');
+  fs.writeFileSync(file, 'x'.repeat(300 * 1024));
+  logWrite(d, 'note', 'fresh');
+  assert.ok(fs.statSync(file).size < 1024);
+  assert.ok(fs.existsSync(file + '.1'));
+});
+
+test('channel_test_on and channel_test_off set and clear the marker the uninstall script reads', () => {
+  const d = tmpDirs();
+  const marker = path.join(d.media, 'config', 'plugin.fpp-porttest.channeltest');
+  logWrite(d, 'channel_test_on', 'Solid color');
+  assert.equal(fs.existsSync(marker), true);
+  logWrite(d, 'channel_test_off', '');
+  assert.equal(fs.existsSync(marker), false);
+});
+
+test('uninstall only sends Test Stop when the marker says our channel test is on', () => {
+  const sh = read('scripts/fpp_uninstall.sh');
+  assert.match(sh, /plugin\.fpp-porttest\.channeltest/);
+  const marker = sh.indexOf('plugin.fpp-porttest.channeltest');
+  const guard = sh.indexOf('if [ -f "${MARKER}" ]');
+  const stop = sh.indexOf('Test Stop');
+  assert.ok(marker !== -1 && marker < guard && guard < stop, 'Test Stop must sit inside the marker check');
+});
