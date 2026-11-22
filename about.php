@@ -1,7 +1,7 @@
 <?php /* fpp-porttest help page. Included inside FPP's page chrome. */ ?>
 <div class="container-fluid">
 	<h2>Port Test</h2>
-	<p>Port Test lists your pixel-string ports. Tick the ports you want and press the test button: only those ports light, using FPP's own channel test. Use the header checkbox to select every port.</p>
+	<p>Port Test lists your pixel-string ports. Tick the ports you want and choose a pattern under Testing: only those ports light, using FPP's own test patterns. Use the header checkbox to select every port.</p>
 	<h3>Patterns</h3>
 	<p>The first seven match the Testing menu on FPP's Pixel Strings page, and run only on the ticked ports.</p>
 	<ul>
@@ -14,6 +14,10 @@
 	<p>Before props are assigned in xLights, give every port 800 pixels on the Pixel Strings page. Then each port can be turned on alone to see which prop is connected to it.</p>
 	<h3>Stays lit until you turn it off</h3>
 	<p>A test has no timeout. It runs until you press Off, so remember to stop it. The first seven patterns play from a small temporary file in FPP's sequences folder; Off deletes it.</p>
+	<h3>Stopping</h3>
+	<p>Off stops only the test this page started. The "Stop it" button, shown when a different test is running, and uninstalling Port Test both send FPP's general Test Stop, which also stops a test started from FPP's own Testing menu. Port Test's temporary files are named <code>porttest_*.fseq</code>; leave that name to the plugin.</p>
+	<h3>Outputs</h3>
+	<p>Only the first enabled pixel string output is listed. If the board has more, the page says so.</p>
 	<h3>Shared channels</h3>
 	<p>The test works on channels. If two ports share channels, lighting one also lights the other; the page flags such overlaps.</p>
 </div>

@@ -62,7 +62,7 @@ Run all unit tests with `node --test tests/`. Port data shape (from a live 10.3 
 
 ---
 
-### Task 1: Repo, and the hardware spike on 172.16.0.52
+### Task 1: Repo, and the hardware spike on <board-ip>
 
 **Files:** Create `.gitignore`, `scripts/dev/spike_multirange.py`, `docs/spike-results.md`, `tests/fixtures/testing-running-fill.json`.
 
@@ -70,10 +70,10 @@ Run all unit tests with `node --test tests/`. Port data shape (from a live 10.3 
 
 - [ ] **Step 1:** In the plugin folder run `git init -b main`. Write `.gitignore` with `harness/.preview-media/` and `node_modules/`. Commit it with the spec and this plan: `docs: add Port Test design and plan`.
 - [ ] **Step 2:** Write `scripts/dev/spike_multirange.py` (stdlib only, throwaway, no tests). Usage: `spike_multirange.py HOST PORT [PORT...] [--sep ';'] [--go] [--stop] [--save PATH]`. `PORT` is the number shown on the Pixel Strings page (`portNumber + 1`). It reads `GET /api/channel/output/co-bbbStrings`, computes each port's channels (3 per pixel, no grouping; spike only), prints the channelSet and the exact JSON body, and sends nothing unless `--go`. With `--go` it POSTs `Test Start` with args `["1000","RGB Single Color",<channelSet>,"#404040"]` to `/api/command`, then prints `GET /api/fppd/testing` (and writes it to `--save PATH`). `--stop` POSTs `Test Stop`.
-- [ ] **Step 3:** Dry run: `python3 scripts/dev/spike_multirange.py 172.16.0.52 2 5`. Expected: one channelSet with exactly two ranges joined by `;`, and nothing sent. While ports are still consecutive at 800 pixels they are `207209-209608;214409-216808`.
+- [ ] **Step 3:** Dry run: `python3 scripts/dev/spike_multirange.py <board-ip> 2 5`. Expected: one channelSet with exactly two ranges joined by `;`, and nothing sent. While ports are still consecutive at 800 pixels they are `207209-209608;214409-216808`.
 - [ ] **Step 4:** **Stop and ask Neil** to confirm he is at `.52` and can see the props on ports 2 and 5. Do not run `--go` without his yes.
-- [ ] **Step 5:** With his yes: `python3 scripts/dev/spike_multirange.py 172.16.0.52 2 5 --go --save tests/fixtures/testing-running-fill.json`. Expected: only the props on ports 2 and 5 light, dim white, and the saved JSON has `"enabled":1` and the channelSet that was sent.
-- [ ] **Step 6:** `python3 scripts/dev/spike_multirange.py 172.16.0.52 2 5 --stop`. Expected: everything dark, and `GET /api/fppd/testing` returns config `{"enabled":0}`.
+- [ ] **Step 5:** With his yes: `python3 scripts/dev/spike_multirange.py <board-ip> 2 5 --go --save tests/fixtures/testing-running-fill.json`. Expected: only the props on ports 2 and 5 light, dim white, and the saved JSON has `"enabled":1` and the channelSet that was sent.
+- [ ] **Step 6:** `python3 scripts/dev/spike_multirange.py <board-ip> 2 5 --stop`. Expected: everything dark, and `GET /api/fppd/testing` returns config `{"enabled":0}`.
 - [ ] **Step 7 (optional, record only):** repeat steps 5 and 6 with `--sep ','` to learn whether 10.3 accepts commas. The plugin uses `;` either way.
 - [ ] **Step 8:** Write `docs/spike-results.md` (date, board, ports, separator, what lit, the saved response, the comma result). **If anything other than exactly ports 2 and 5 lit, stop and report to Neil; do not start Task 2.** Commit: `docs: record multi-range hardware spike`.
 
@@ -269,15 +269,15 @@ Page elements added: `#ptPattern` (a select labelled "Testing:" with options `of
   - Failure mode on, tick a port: `#ptError` contains "Test Start failed"; `#ptStatus` is empty; no row has `table-success`; the tick is still checked (Review Focus 2).
 - [ ] **Step 4:** Run `node --test tests/` (Expected: all PASS) and `php -l status.php`. Commit: `feat(ui): start, update, stop and restore tests`.
 
-### Task 9: Publish, install and prove it on 172.16.0.52
+### Task 9: Publish, install and prove it on <board-ip>
 
 **Files:** Modify `README.md`. Create `docs/hardware-acceptance.md`.
 
 - [ ] **Step 1:** Finish `README.md`: what it does, how to install, how to use it, and the limits (channel patterns only; ports must not share channels; cape labels not shown; a test stays lit until turned Off; Pi uses `co-pixelStrings` and is untested).
 - [ ] **Step 2:** Run `node --test tests/` (Expected: all PASS) and `php -l` on each PHP file. Commit: `docs: README`.
 - [ ] **Step 3:** **Ask Neil** for permission to create the public repo. On yes: `gh repo create heffneil/fpp-porttest --public --source . --remote origin --push --description "Light chosen pixel ports on an FPP controller to find which props are on them."`. Verify: `gh repo view heffneil/fpp-porttest --json visibility` shows `PUBLIC`, and `curl -sI https://raw.githubusercontent.com/heffneil/fpp-porttest/main/pluginInfo.json` returns HTTP 200.
-- [ ] **Step 4:** **Ask Neil** to let me raise `.52`'s UI level from 1 to 3 (needed to paste a URL into the Plugin Manager). On yes: `curl -s -X PUT -d "3" http://172.16.0.52/api/settings/uiLevel`. Verify the value reads `3`. Revert any time with `-d "1"`.
-- [ ] **Step 5:** Neil installs it from the Plugin Manager on `.52`: reload `plugins.php`, paste `https://raw.githubusercontent.com/heffneil/fpp-porttest/main/pluginInfo.json` into the search box, read the install dialog's privacy summary, click Install. (I do not click Install.) Expected: "Port Test" appears under Status/Control and `curl -s http://172.16.0.52/api/plugin` lists `fpp-porttest`.
+- [ ] **Step 4:** **Ask Neil** to let me raise `.52`'s UI level from 1 to 3 (needed to paste a URL into the Plugin Manager). On yes: `curl -s -X PUT -d "3" http://<board-ip>/api/settings/uiLevel`. Verify the value reads `3`. Revert any time with `-d "1"`.
+- [ ] **Step 5:** Neil installs it from the Plugin Manager on `.52`: reload `plugins.php`, paste `https://raw.githubusercontent.com/heffneil/fpp-porttest/main/pluginInfo.json` into the search box, read the install dialog's privacy summary, click Install. (I do not click Install.) Expected: "Port Test" appears under Status/Control and `curl -s http://<board-ip>/api/plugin` lists `fpp-porttest`.
 - [ ] **Step 6:** Acceptance with Neil at the board (every port is already at 800 pixels). Record each result in `docs/hardware-acceptance.md`: (a) tick one port: only its props light and every other port is dark; (b) tick ports 2, 5 and 9: exactly those light; (c) untick 5 while running: within about 2 seconds port 5 goes dark and 2 and 9 stay lit without flicker; (d) with ports 2 and 9 still ticked, reload the page: rows 2 and 9 are ticked and tinted, the status reads "Testing 2 of 48 ports", and the props stayed lit through the reload; (e) choose Off: everything dark and `GET /api/fppd/testing` config is `{"enabled":0}`; (f) optional, only with Neil's yes and a revert afterwards: set port 5's start channel equal to port 4's on the Pixel Strings page, confirm the page shows both overlap badges, tick port 4 and record whether port 5's props also light. If any check fails, stop, record it, and bring it to Neil.
 - [ ] **Step 7:** Commit and push: `docs: BeagleBone Black acceptance results`.
 

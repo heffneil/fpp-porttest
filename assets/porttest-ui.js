@@ -40,7 +40,12 @@
         rootEl.appendChild(alertBox('info', 'No pixel string output is configured on this board.'));
         return { getSelection: function () { return []; } };
       }
-      return build(rootEl, output.ports, opts.api, output.subType);
+      var handle = build(rootEl, output.ports, opts.api, output.subType);
+      if (output.otherEnabled > 0) {
+        rootEl.insertBefore(alertBox('info', 'This board has ' + output.otherEnabled + ' more enabled pixel string output' +
+          (output.otherEnabled === 1 ? '' : 's') + '. Only the first one is listed here.'), rootEl.firstChild);
+      }
+      return handle;
     }, function (err) {
       rootEl.textContent = '';
       rootEl.appendChild(alertBox('danger', 'Could not load the pixel string outputs: ' + messageOf(err)));

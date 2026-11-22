@@ -16,7 +16,7 @@ Port Test appears under **Status/Control**.
 
 ## Use
 
-1. Open **Status/Control → Port Test**. Every pixel-string port is listed with its channels and pixel count.
+1. Open **Status/Control → Port Test**. The ports of the first enabled pixel string output are listed with their channels and pixel count.
 2. Tick the ports you want. The checkbox in the header selects all of them. Tapping anywhere on a row ticks it.
 3. Pick a pattern next to **Testing:**. The first seven are FPP's own Testing menu: *Port Number* (port 5 lights 5 white pixels and the rest of the port cycles red, green, blue, so you can count to read the port), *Pixel Count by Port*, *Pixel Count by String*, and the Red, Green, Blue and White *Fade*. Solid color, RGB Chase and RGB Cycle follow. Ticked ports light and turn green in the list; the status reads "Testing N of M ports".
 4. Tick or untick ports while it runs and the lit set follows. Choose **Off** to stop.
@@ -31,7 +31,10 @@ A test stays lit until you turn it off. Reloading the page does not stop it, and
 - Ports must not share channels. If two do, lighting one lights the other; the page flags this with a badge.
 - Cape port labels (such as "P1-3") are not shown. Ports are numbered 1 upwards.
 - A port with no pixels cannot be ticked. Set a pixel count on the Pixel Strings page.
-- Tested on a BeagleBone Black (FPP 10.3). Pi boards use `co-pixelStrings` and are untested.
+- Only the first enabled pixel string output is listed; the page notes when there are more.
+- Off stops only this page's test, but "Stop it" (shown when a different test is running) and uninstalling send FPP's general Test Stop, which also stops a test started from FPP's own Testing menu.
+- Temporary files are named `porttest_*.fseq`; the plugin deletes any file with that name, so don't use it for your own sequences.
+- Tested on BeagleBone Black boards running FPP 10.3 and 10.4. Not yet tested on the nightly build or in light/dark themes side by side. Pi boards use `co-pixelStrings` and are untested.
 
 ## Privacy
 

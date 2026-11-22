@@ -23,17 +23,22 @@
     }
 
     // The first enabled output of the board's pixel-string config, as
-    // {ports: [...]}, or null when there is none.
+    // {ports: [...], subType, otherEnabled}, or null when there is none.
+    // otherEnabled counts further enabled outputs, which are not listed: port
+    // numbers can repeat across outputs, so merging them would be ambiguous.
     function getOutput(configFile) {
       return getJson('/api/channel/output/' + encodeURIComponent(configFile)).then(function (cfg) {
         var outputs = cfg && Array.isArray(cfg.channelOutputs) ? cfg.channelOutputs : [];
+        var first = null;
+        var others = 0;
         for (var i = 0; i < outputs.length; i++) {
           var o = outputs[i];
-          if (o && typeof o === 'object' && o.enabled) {
-            return { ports: Array.isArray(o.outputs) ? o.outputs : [], subType: typeof o.subType === 'string' ? o.subType : '' };
-          }
+          if (!o || typeof o !== 'object' || !o.enabled) continue;
+          if (first) { others++; continue; }
+          first = { ports: Array.isArray(o.outputs) ? o.outputs : [], subType: typeof o.subType === 'string' ? o.subType : '' };
         }
-        return null;
+        if (first) first.otherEnabled = others;
+        return first;
       });
     }
 

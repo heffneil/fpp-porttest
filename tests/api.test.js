@@ -19,8 +19,20 @@ const rig = (response) => {
 test('getOutput returns the first enabled output as {ports}', async () => {
   const cfg = { channelOutputs: [{ enabled: 0, outputs: [{ portNumber: 9 }] }, { enabled: 1, subType: 'K32A-B', outputs: [{ portNumber: 0 }] }] };
   const { api, calls } = rig(reply(200, JSON.stringify(cfg), 'application/json'));
-  assert.deepEqual(await api.getOutput('co-bbbStrings'), { ports: [{ portNumber: 0 }], subType: 'K32A-B' });
+  assert.deepEqual(await api.getOutput('co-bbbStrings'), { ports: [{ portNumber: 0 }], subType: 'K32A-B', otherEnabled: 0 });
   assert.equal(calls[0].url, '/api/channel/output/co-bbbStrings');
+});
+
+test('getOutput counts further enabled outputs it does not list', async () => {
+  const cfg = { channelOutputs: [
+    { enabled: 1, subType: 'A', outputs: [{ portNumber: 0 }] },
+    { enabled: 0, outputs: [{ portNumber: 1 }] },
+    { enabled: 1, subType: 'B', outputs: [{ portNumber: 0 }] },
+    { enabled: 1, subType: 'C', outputs: [] }
+  ] };
+  const out = await rig(reply(200, JSON.stringify(cfg), 'application/json')).api.getOutput('x');
+  assert.equal(out.subType, 'A');
+  assert.equal(out.otherEnabled, 2);
 });
 
 test('GETs carry no Content-Type header (FPP 404s them)', async () => {

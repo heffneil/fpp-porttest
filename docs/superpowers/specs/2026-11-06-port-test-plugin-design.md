@@ -42,7 +42,7 @@ Testing: [ Solid color ▾ ]  [color]   ● Testing 1 of 48 ports
 - No "only" shortcut link on each row.
 - He sets 800 pixels on every port himself for commissioning; ports with no pixel count do not need special handling.
 - A running test stays lit until he turns it off. No automatic timeout.
-- The first board for hardware proof is **172.16.0.52** (Kulp32-LEFT-SIDE-OF-DOOR, BeagleBone Black, K32A-B, FPP 10.3). It already has 800 pixels on all 48 ports and no two ports share channels (checked), so the plugin's core assumption holds on its real configuration.
+- The first board for hardware proof is **<board-ip>** (<board-name>, BeagleBone Black, K32A-B, FPP 10.3). It already has 800 pixels on all 48 ports and no two ports share channels (checked), so the plugin's core assumption holds on its real configuration.
 
 ## How it works
 
@@ -114,7 +114,7 @@ File split and code structure; how to recognise and label smart-receiver ports (
 
 ## Known unknowns to settle by experiment
 
-- **Step 1 of the plan is a hardware spike, before any page work.** On one real board, run `Test Start` over two non-adjacent port ranges joined with `;` and confirm only those two ports light. Nobody has proved this on a board yet. Neil chose 172.16.0.52 and should be there to watch, because it lights real pixels.
+- **Step 1 of the plan is a hardware spike, before any page work.** On one real board, run `Test Start` over two non-adjacent port ranges joined with `;` and confirm only those two ports light. Nobody has proved this on a board yet. Neil chose <board-ip> and should be there to watch, because it lights real pixels.
 - Whether the channel test lights outputs on a remote-mode board with an idle player (assumed yes, because FPP's own pixel test works on remotes).
 - Whether ports whose strings share channels behave as the overlap warning assumes.
 

@@ -8,7 +8,7 @@ Does FPP's channel test, given two port ranges joined by `;`, light only those t
 
 ## Board
 
-172.16.0.52, Kulp32-LEFT-SIDE-OF-DOOR: BeagleBone Black (K32A-B), FPP 10.3, remote mode, 48 ports at 800 RGB pixels each, no two ports sharing channels. Neil was at the board.
+<board-ip>, <board-name>: BeagleBone Black (K32A-B), FPP 10.3, remote mode, 48 ports at 800 RGB pixels each, no two ports sharing channels. Neil was at the board.
 
 ## What was sent
 
